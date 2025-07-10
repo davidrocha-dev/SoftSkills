@@ -6,6 +6,8 @@ import Header from '../components/Header';
 import '../assets/styles/login.css';
 import logo from '../assets/img/softinsa-logo.png'; 
 import { Link } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 
 const Login = () => {
@@ -16,10 +18,11 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login: authLogin } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   // Carregar email salvo se existir
   useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail');
+    const savedEmail = Cookies.get('rememberedEmail');
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
@@ -28,7 +31,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
     
     try {
@@ -51,9 +53,9 @@ const Login = () => {
       
       // Salvar email se "Relembrar login" estiver marcado
       if (rememberMe) {
-        localStorage.setItem('rememberedEmail', email);
+        Cookies.set('rememberedEmail', email, { expires: 30 }); // 30 dias
       } else {
-        localStorage.removeItem('rememberedEmail');
+        Cookies.remove('rememberedEmail');
       }
       
       // Redirecionamento
@@ -66,7 +68,8 @@ const Login = () => {
       if (err.response?.data?.error?.includes('não verificada')) {
         setError('Conta não verificada. Verifique seu email para ativar a conta.');
       } else {
-        setError(err.message || 'Credenciais inválidas');
+        // Mostrar a mensagem do backend se existir, senão mostrar 'Credenciais inválidas'
+        setError(err.response?.data?.message || 'Credenciais inválidas');
       }
 
       console.error("Erro no login:", err);
@@ -104,17 +107,34 @@ const Login = () => {
               />
             </div>
             
-            <div className="form-group">
+            <div className="form-group" style={{ position: 'relative' }}>
               <label className="form-label">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className="form-input"
                 placeholder="Insira a palavra passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                style={{ paddingRight: 38 }}
               />
+              <span
+                onClick={() => setShowPassword((v) => !v)}
+                style={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(10%)',
+                  cursor: 'pointer',
+                  color: '#888',
+                  fontSize: '1.3em',
+                  lineHeight: 1
+                }}
+                tabIndex={-1}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
             
             <div className="form-options">
