@@ -11,6 +11,7 @@ router.get('/formador/courses', authorize(['formador']), courseController.listFo
 router.delete('/:id', authorize(['gestor']), courseController.deleteCourse);
 router.get('/enrolled/:userId', courseController.getEnrolledCourses);
 router.get('/:id',authorize(['gestor','formador','formando']), courseController.getCourseById);
+router.post('/resource', authorize(['gestor','formador']), courseController.createResource);
 
 
 // Criar seção individual para um curso
