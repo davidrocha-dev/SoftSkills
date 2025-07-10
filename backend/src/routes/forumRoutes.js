@@ -1,0 +1,214 @@
+const express = require('express');
+const { Topic, Comment, User, Reaction, Area, Category, Report } = require('../models');
+const router = express.Router();
+
+// Endpoint real para buscar tópicos do fórum
+router.get('/topics', async (req, res) => {
+  try {
+    console.log('A buscar tópicos do fórum...');
+    const topics = await Topic.findAll({
+      include: [
+        {
+          model: Area,
+          as: 'area',
+          include: [
+            {
+              model: Category,
+              as: 'category',
+              attributes: ['description']
+            }
+          ]
+        },
+        {
+          model: Comment,
+          as: 'comments',
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['name', 'pfp']
+            },
+            {
+              model: Reaction,
+              as: 'Reaction'
+            }
+          ]
+        }
+      ]
+    });
+    // Buscar todos os comentários principais (parentCommentId == null)
+    let mainComments = [];
+    topics.forEach(topic => {
+      (topic.comments || []).forEach(comment => {
+        if (comment.parentCommentId == null) {
+          mainComments.push({ topic, comment });
+        }
+      });
+    });
+    // Para cada comentário principal, construir o cartão
+    let result = mainComments.map(({ topic, comment }) => {
+      // replies recursivos
+      function buildReplies(comments, parentId) {
+        return comments
+          .filter(c => c.parentCommentId === parentId)
+          .map(reply => ({
+            id: reply.id,
+            content: reply.content,
+            authorName: reply.user?.name || 'Desconhecido',
+            authorAvatar: reply.user?.pfp || '',
+            date: reply.commentDate,
+            Reaction: reply.Reaction || [],
+            replies: buildReplies(comments, reply.id)
+          }));
+      }
+      const replies = buildReplies(topic.comments || [], comment.id);
+      let likes = 0, dislikes = 0;
+      (topic.comments || []).forEach(c => {
+        c.Reaction?.forEach(reaction => {
+          if (reaction.type) likes++;
+          else dislikes++;
+        });
+      });
+      return {
+        id: comment.id, // id do comentário principal
+        topicId: topic.id,
+        topicTitle: topic.description,
+        authorName: comment.user?.name || 'Desconhecido',
+        authorAvatar: comment.user?.pfp || '',
+        authorId: comment.user?.id || null,
+        category: topic.area?.category?.description || '',
+        area: topic.area?.description || '',
+        title: topic.description,
+        description: topic.description,
+        date: comment.commentDate || '',
+        commentsCount: (topic.comments || []).length,
+        likes,
+        dislikes,
+        firstComment: {
+          id: comment.id,
+          content: comment.content,
+          authorName: comment.user?.name || 'Desconhecido',
+          authorAvatar: comment.user?.pfp || '',
+          authorId: comment.user?.id || null,
+          date: comment.commentDate,
+          Reaction: comment.Reaction || [],
+          replies
+        }
+      };
+    });
+
+    // Filtrar por categoria se fornecido
+    const { category, search, sort } = req.query;
+    if (category && category !== 'Todos') {
+      result = result.filter(topic => topic.category === category);
+    }
+    // Filtrar por pesquisa se fornecido
+    if (search && search.trim() !== '') {
+      const s = search.trim().toLowerCase();
+      result = result.filter(topic =>
+        topic.title.toLowerCase().includes(s) ||
+        (topic.firstComment && topic.firstComment.content && topic.firstComment.content.toLowerCase().includes(s))
+      );
+    }
+    // Ordenar por comentário mais recente ou mais antigo (considerando segundos)
+    if (sort === 'recent') {
+      result = result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } else if (sort === 'oldest') {
+      result = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+
+    res.json({ topics: result });
+  } catch (err) {
+    console.error('ERRO AO BUSCAR TÓPICOS:', err);
+    res.status(500).json({ error: 'Erro ao buscar tópicos', details: err.message });
+  }
+});
+
+// Endpoint para criar ou atualizar uma reação
+router.post('/reactions', async (req, res) => {
+  try {
+    const { commentId, type, userId } = req.body;
+    if (!commentId || typeof type !== 'boolean' && type !== 0 && type !== 1 || !userId) {
+      return res.status(400).json({ error: 'Dados obrigatórios em falta.' });
+    }
+    let reaction = await Reaction.findOne({ where: { commentId, userId } });
+    if (reaction) {
+      if (reaction.type === type) {
+        // Se já existe e é igual, elimina (toggle off)
+        await reaction.destroy();
+        return res.json({ success: true, deleted: true });
+      } else {
+        // Se já existe mas é diferente, atualiza
+        reaction.type = type;
+        await reaction.save();
+        return res.json({ success: true, updated: true });
+      }
+    } else {
+      await Reaction.create({ commentId, userId, type });
+      return res.json({ success: true, created: true });
+    }
+  } catch (err) {
+    console.error('ERRO AO REGISTAR REAÇÃO:', err);
+    res.status(500).json({ error: 'Erro ao registar reação', details: err.message });
+  }
+});
+
+// Endpoint para criar um novo comentário associado a um tópico
+router.post('/comments', async (req, res) => {
+  try {
+    const { topicId, content, userId, parentCommentId } = req.body;
+    if (!topicId || !content) {
+      return res.status(400).json({ error: 'topicId e content são obrigatórios.' });
+    }
+    const now = new Date();
+    const comment = await Comment.create({
+      topicId,
+      content,
+      parentCommentId: parentCommentId || null,
+      userId: userId || 1,
+      commentDate: now
+    });
+    res.status(201).json({ success: true, comment });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar comentário', details: err.message });
+  }
+});
+
+// Endpoint para denunciar um comentário
+router.post('/reports', async (req, res) => {
+  try {
+    console.log('POST /reports body:', req.body);
+    const { commentId, userId, reason } = req.body;
+    if (!commentId || !userId) {
+      console.log('Dados obrigatórios em falta:', { commentId, userId });
+      return res.status(400).json({ error: 'commentId e userId são obrigatórios.' });
+    }
+    const now = new Date();
+    const report = await Report.create({
+      commentId,
+      userId,
+      reason: reason || '',
+      reportDate: now,
+      status: 0 // Pendente
+    });
+    console.log('Report criado:', report);
+    res.status(201).json({ success: true, report });
+  } catch (err) {
+    console.error('ERRO AO DENUNCIAR:', err);
+    res.status(500).json({ error: 'Erro ao denunciar comentário', details: err.message });
+  }
+});
+
+// Endpoint para devolver todos os tópicos (id e descricao) para dropdowns
+router.get('/topics-list', async (req, res) => {
+  try {
+    const topics = await Topic.findAll({
+      attributes: ['id', 'description']
+    });
+    res.json({ topics });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar tópicos', details: err.message });
+  }
+});
+
+module.exports = router; 

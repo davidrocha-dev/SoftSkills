@@ -1,0 +1,229 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import Header from '../components/Header';
+import { api } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
+import { Container, Card, Spinner, Alert, Button, Modal, Form } from 'react-bootstrap';
+import { BiLike, BiDislike } from 'react-icons/bi';
+import { BiErrorCircle } from 'react-icons/bi';
+
+function CommentTree({ replies, level = 0, handleReact, handleReply, replyingId, replyContent, setReplyContent, handleSubmitReply, handleReport }) {
+  if (!replies || replies.length === 0) return null;
+  return replies.map(reply => (
+    <div key={reply.id} style={{ marginLeft: level * 32, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e0e0e0', padding: 12, marginBottom: 12 }}>
+      <div className="d-flex align-items-center mb-1">
+        <img src={reply.authorAvatar || '/default-avatar.png'} alt="avatar" className="rounded-circle me-2" width={22} height={22} />
+        <span className="fw-semibold">{reply.authorName}</span>
+        <span className="text-muted small ms-2">{reply.date ? new Date(reply.date).toLocaleDateString('pt-PT') : ''}</span>
+      </div>
+      <div className="fst-italic text-secondary mb-2">{reply.content}</div>
+      <div className="d-flex align-items-center gap-2 mb-1">
+        <button className="btn btn-xs btn-outline-success d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, true, e)}>
+          <BiLike className="me-1" />
+          <span>{reply.Reaction ? reply.Reaction.filter(r => r.type).length : 0}</span>
+        </button>
+        <button className="btn btn-xs btn-outline-danger d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, false, e)}>
+          <BiDislike className="me-1" />
+          <span>{reply.Reaction ? reply.Reaction.filter(r => !r.type).length : 0}</span>
+        </button>
+        <button className="btn btn-xs btn-outline-primary py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReply(reply.id)}>
+          Responder
+        </button>
+        <button className="btn btn-xs btn-outline-warning py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReport(reply.id)}>
+          <BiErrorCircle />
+        </button>
+      </div>
+      {replyingId === reply.id && (
+        <form onSubmit={e => handleSubmitReply(e, reply.id)} className="mt-2">
+          <textarea className="form-control mb-2" rows={2} value={replyContent} onChange={e => setReplyContent(e.target.value)} required />
+          <button type="submit" className="btn btn-sm btn-primary">Enviar resposta</button>
+        </form>
+      )}
+      <CommentTree replies={reply.replies} level={level + 1} handleReact={handleReact} handleReply={handleReply} replyingId={replyingId} replyContent={replyContent} setReplyContent={setReplyContent} handleSubmitReply={handleSubmitReply} handleReport={handleReport} />
+    </div>
+  ));
+}
+
+const ForumTopic = () => {
+  const { id } = useParams();
+  const { user } = useAuth();
+  const [topic, setTopic] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [replyingId, setReplyingId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportCommentId, setReportCommentId] = useState(null);
+  const [reportReason, setReportReason] = useState('');
+  const [reporting, setReporting] = useState(false);
+  const [reportMsg, setReportMsg] = useState('');
+
+  useEffect(() => {
+    fetchTopic();
+    // eslint-disable-next-line
+  }, [id]);
+
+  const fetchTopic = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/forum/topics`); // Reutiliza endpoint, filtra no frontend
+      const found = (res.data.topics || []).find(t => t.id === Number(id));
+      setTopic(found || null);
+      setError(found ? '' : 'Tópico não encontrado.');
+    } catch (err) {
+      setTopic(null);
+      setError('Erro ao carregar tópico.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReact = async (commentId, type, e) => {
+    if (e) e.stopPropagation();
+    if (!user) return;
+    try {
+      await api.post('/forum/reactions', {
+        commentId,
+        type, // Enviar booleano diretamente
+        userId: user.id
+      });
+      fetchTopic();
+    } catch (err) {
+      alert('Erro ao registar reação.');
+    }
+  };
+
+  const handleReply = (commentId) => {
+    setReplyingId(commentId);
+    setReplyContent('');
+  };
+
+  const handleSubmitReply = async (e, parentCommentId) => {
+    e.preventDefault();
+    if (!user) return;
+    try {
+      await api.post('/forum/comments', {
+        topicId: topic.topicId || topic.id,
+        parentCommentId,
+        content: replyContent,
+        userId: user.id
+      });
+      setReplyingId(null);
+      setReplyContent('');
+      fetchTopic();
+    } catch (err) {
+      alert('Erro ao enviar resposta.');
+    }
+  };
+
+  const handleReport = (commentId) => {
+    setReportCommentId(commentId);
+    setReportReason('');
+    setReportMsg('');
+    setShowReportModal(true);
+  };
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setReporting(true);
+    setReportMsg('');
+    try {
+      await api.post('/forum/reports', {
+        commentId: reportCommentId,
+        userId: user.id,
+        reason: reportReason
+      });
+      setReportMsg('Comentário denunciado com sucesso!');
+      setTimeout(() => setShowReportModal(false), 1200);
+    } catch (err) {
+      setReportMsg('Erro ao denunciar comentário.');
+    } finally {
+      setReporting(false);
+    }
+  };
+
+  if (loading) return <><Header /><Container className="py-4 text-center"><Spinner /></Container></>;
+  if (error) return <><Header /><Container className="py-4"><Alert variant="danger">{error}</Alert></Container></>;
+  if (!topic) return <><Header /><Container className="py-4"><Alert variant="warning">Tópico não encontrado.</Alert></Container></>;
+
+  const main = topic.firstComment;
+  const replies = main?.replies || [];
+
+  return (
+    <>
+      <Header />
+      <Container className="py-4">
+        <Card className="mb-4 shadow-sm">
+          <Card.Body>
+            <div className="d-flex align-items-center mb-2">
+              <img src={topic.authorAvatar || '/default-avatar.png'} alt="avatar" className="rounded-circle me-2" width={36} height={36} />
+              <div>
+                <div className="fw-bold">{topic.authorName}</div>
+                <div className="text-muted small">{topic.category}</div>
+                <div className="h5 mb-2 mt-2">{topic.title}</div>
+              </div>
+            </div>
+            <Card.Text className="fst-italic text-secondary mb-3">{main?.content}</Card.Text>
+            <div className="d-flex align-items-center gap-2 mb-2">
+              <button className="btn btn-sm btn-outline-success d-flex align-items-center" onClick={e => handleReact(main.id, true, e)}>
+                <BiLike className="me-1" />
+                <span>{main.Reaction ? main.Reaction.filter(r => r.type).length : 0}</span>
+              </button>
+              <button className="btn btn-sm btn-outline-danger d-flex align-items-center" onClick={e => handleReact(main.id, false, e)}>
+                <BiDislike className="me-1" />
+                <span>{main.Reaction ? main.Reaction.filter(r => !r.type).length : 0}</span>
+              </button>
+              <button className="btn btn-sm btn-outline-primary ms-2" onClick={() => handleReply(main.id)}>
+                Responder
+              </button>
+              <button className="btn btn-sm btn-outline-warning ms-2" onClick={() => handleReport(main.id)}>
+                <BiErrorCircle />
+              </button>
+            </div>
+            {replyingId === main.id && (
+              <form onSubmit={e => handleSubmitReply(e, main.id)} className="mt-2">
+                <textarea className="form-control mb-2" rows={2} value={replyContent} onChange={e => setReplyContent(e.target.value)} required />
+                <button type="submit" className="btn btn-sm btn-primary">Enviar resposta</button>
+              </form>
+            )}
+          </Card.Body>
+        </Card>
+        <h6 className="mb-3">Respostas</h6>
+        {replies.length === 0 && <div className="text-muted">Nenhuma resposta ainda.</div>}
+        <div className="mb-4">
+          <CommentTree replies={replies} handleReact={handleReact} handleReply={handleReply} replyingId={replyingId} replyContent={replyContent} setReplyContent={setReplyContent} handleSubmitReply={handleSubmitReply} handleReport={handleReport} />
+        </div>
+        <Button as={Link} to="/forum" variant="secondary" className="mt-3">Voltar ao Fórum</Button>
+      </Container>
+      {/* Modal de denúncia */}
+      <Modal show={showReportModal} onHide={() => setShowReportModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Denunciar comentário</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmitReport}>
+            <Form.Group className="mb-3">
+              <Form.Label>Motivo</Form.Label>
+              <Form.Select value={reportReason} onChange={e => setReportReason(e.target.value)} required>
+                <option value="">Selecione o motivo...</option>
+                <option value="Comentário ofensivo">Comentário ofensivo</option>
+                <option value="Spam">Spam</option>
+                <option value="Fora de contexto">Fora de contexto</option>
+                <option value="Informação incorreta">Informação incorreta</option>
+                <option value="Irrelevante">Irrelevante</option>
+                <option value="Linguagem inadequada">Linguagem inadequada</option>
+                <option value="Duplicado">Duplicado</option>
+              </Form.Select>
+            </Form.Group>
+            {reportMsg && <Alert variant={reportMsg.includes('sucesso') ? 'success' : 'danger'}>{reportMsg}</Alert>}
+            <Button type="submit" className="btn btn-warning" disabled={reporting}>
+              {reporting ? 'A denunciar...' : 'Denunciar'}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    </>
+  );
+};
+
+export default ForumTopic; 
