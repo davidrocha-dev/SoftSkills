@@ -1,0 +1,90 @@
+/* Estilos para a navbar */
+.navbar {
+  background-color: #0066cc; /* Azul forte para contraste */
+  padding: 10px 20px;
+}
+
+.navbar-nav {
+  display: flex;
+  justify-content: space-around; /* Distribui os itens da navbar */
+  align-items: center;
+  width: 100%;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: rgb(0, 0, 0) !important;
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.nav-link:hover {
+  background-color: #005a99; /* Azul mais claro no hover */
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: rgb(0, 81, 255);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #000000;
+  z-index: 1000;
+  display: none;
+}
+
+/* Mostrar o menu ao passar o mouse */
+.nav-item:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  padding: 12px;
+  cursor: pointer;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0; /* Cor de fundo no hover */
+}
+
+/* Submenu de tópicos */
+.submenu-topics {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: white;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #ddd;
+}
+
+.submenu-topics li span {
+  padding: 12px;
+  color: #333;
+}
+
+.submenu-topics li:hover {
+  background-color: #f0f0f0;
+}
+
+/* Ajustes no botão Sair */
+.btn-outline-danger {
+  border-color: #cc3333;
+  color: #cc3333;
+}
+
+.btn-outline-danger:hover {
+  background-color: #cc3333;
+  color: white;
+}

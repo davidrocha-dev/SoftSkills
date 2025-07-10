@@ -1,0 +1,82 @@
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../services/authService';
+import { Container, Alert, Spinner } from 'react-bootstrap';
+
+const VerifyAccount = () => {
+  const [status, setStatus] = useState('verifying');
+  const [message, setMessage] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const verifyAccount = async () => {
+      const queryParams = new URLSearchParams(location.search);
+      const email = queryParams.get('email');
+      
+      if (!email) {
+        setStatus('error');
+        setMessage('Email não fornecido para verificação');
+        navigate('/login');
+        return;
+      }
+      
+      try {
+        // 1. Verificar primeiro o estado da conta
+        const stateResponse = await api.get(`/users/activation-state?email=${encodeURIComponent(email)}`);
+        
+        // Se a conta já estiver verificada, redirecione
+        if (stateResponse.data.isVerified) {
+          navigate('/login');
+          return;
+        }
+
+        // 2. Realizar a verificação
+        const response = await api.post('/api/auth/verify-account', { email });
+        
+        if (response.data.success) {
+          setStatus('success');
+          setMessage('Conta verificada com sucesso! Redirecionando para login...');
+          
+          // Redirecionar após 3 segundos
+          setTimeout(() => navigate('/login'), 3000);
+        } else {
+          setStatus('error');
+          setMessage(response.data.error || 'Falha na verificação');
+        }
+      } catch (error) {
+        setStatus('error');
+        setMessage('Erro ao verificar conta: ' + (error.response?.data?.error || error.message));
+      }
+    };
+    
+    verifyAccount();
+  }, [location, navigate]);
+
+  return (
+    <Container className="mt-5 text-center">
+      {status === 'verifying' && (
+        <>
+          <Spinner animation="border" role="status" />
+          <p className="mt-3">Verificando sua conta...</p>
+        </>
+      )}
+      
+      {status === 'success' && (
+        <Alert variant="success">
+          <Alert.Heading>Conta Verificada!</Alert.Heading>
+          <p>{message}</p>
+        </Alert>
+      )}
+      
+      {status === 'error' && (
+        <Alert variant="danger">
+          <Alert.Heading>Erro na Verificação</Alert.Heading>
+          <p>{message}</p>
+        </Alert>
+      )}
+    </Container>
+  );
+};
+
+export default VerifyAccount;
