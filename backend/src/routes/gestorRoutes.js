@@ -4,7 +4,8 @@ const {
   listUsers,
   updateUserStatus,
   updateUser,
-  countUsersByRole
+  countUsersByRole,
+  getUserDetails
 } = require('../controllers/gestorController');
 const courseController = require('../controllers/courseController');
 const { authorize } = require('../middleware/authMiddleware');
@@ -18,6 +19,7 @@ router.get('/users', authorize(['gestor']), listUsers);
 router.patch('/users/:id/status', authorize(['gestor']), updateUserStatus);
 router.patch('/users/:id', authorize(['gestor']), updateUser);
 router.get('/users/counts', authorize(['gestor']), countUsersByRole);
+router.get('/users/:id/details', authorize(['gestor']), getUserDetails);
 router.get('/courses/counts', authorize(['gestor', 'formador']), courseController.getCourseCounts);
 router.delete('/users/:id', authorize(['gestor']), userController.deleteUser);
 

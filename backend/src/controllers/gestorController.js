@@ -1,6 +1,6 @@
 // src/controllers/gestorController.js
 const bcrypt = require('bcrypt');
-const { User } = require('../models');
+const { User, Enrollment, Course, Certificate } = require('../models');
 const { Op, fn, col} = require('sequelize');
 const sequelize = require('../config/database');  
 
@@ -166,10 +166,61 @@ async function countUsersByRole(req, res) {
   }
 }
 
+async function getUserDetails(req, res) {
+  try {
+    const { id } = req.params;
+    
+    const user = await User.findByPk(id, {
+      attributes: ['id', 'workerNumber', 'name', 'email', 'primaryRole', 'status', 'pfp']
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilizador não encontrado' });
+    }
+
+    // Buscar inscrições em cursos
+    const enrollments = await Enrollment.findAll({
+      where: { userId: user.id },
+      include: [{
+        model: Course,
+        as: 'course',
+        attributes: ['id', 'title', 'hours']
+      }]
+    });
+
+    // Buscar certificados para obter as notas
+    const certificates = await Certificate.findAll({
+      where: { workerNumber: user.workerNumber },
+      attributes: ['courseId', 'grade']
+    });
+
+    // Criar um mapa de notas por curso
+    const gradeMap = {};
+    certificates.forEach(cert => {
+      gradeMap[cert.courseId] = cert.grade;
+    });
+
+    return res.json({
+      success: true,
+      user,
+      enrollments: enrollments.map(e => ({
+        courseId: e.course.id,
+        courseTitle: e.course.title,
+        horas: e.course.hours,
+        grade: gradeMap[e.course.id] || null
+      }))
+    });
+  } catch (err) {
+    console.error('Erro ao obter detalhes do utilizador:', err);
+    return res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+}
+
 module.exports = {
   createUser,
   listUsers,
   updateUserStatus,
   updateUser,
-  countUsersByRole    
+  countUsersByRole,
+  getUserDetails
 };
