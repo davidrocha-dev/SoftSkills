@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Instância Axios configurada para a API
 export const api = axios.create({
-  baseURL: 'https://pint-13nr.onrender.com/api',
+  baseURL: 'https://localhost:3000/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
