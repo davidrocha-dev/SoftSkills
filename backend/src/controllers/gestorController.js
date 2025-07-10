@@ -184,7 +184,7 @@ async function getUserDetails(req, res) {
       include: [{
         model: Course,
         as: 'course',
-        attributes: ['id', 'title', 'hours']
+        attributes: ['id', 'title', 'hours', 'startDate', 'endDate']
       }]
     });
 
@@ -207,6 +207,8 @@ async function getUserDetails(req, res) {
         courseId: e.course.id,
         courseTitle: e.course.title,
         horas: e.course.hours,
+        startDate: e.course.startDate,
+        endDate: e.course.endDate,
         grade: gradeMap[e.course.id] || null
       }))
     });
