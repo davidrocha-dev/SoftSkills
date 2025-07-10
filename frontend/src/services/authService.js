@@ -7,7 +7,8 @@ export const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: false // Desabilita credentials para evitar problemas de CORS
 });
 
 // Interceptor para injetar o token em todas as requisições
