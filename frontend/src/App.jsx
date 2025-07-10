@@ -17,6 +17,7 @@ import Requests from './views/Requests';
 import RequestsDetails from './views/RequestsDetails';
 import SettingsPage from './views/Settings';
 import ResetPassword from './views/ResetPassword';
+import UserDetails from './components/UserDetails';
 //import Forum from './components/Forum';
 import Course from './views/Course';
 //import Discussion from './components/Discussion';
@@ -130,6 +131,12 @@ function App() {
           <Route path="/id/:workerNumber" element={
             <ProtectedRoute allowedRoles={['gestor','formador','formando']}>
               <Profile />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/user/:id" element={
+            <ProtectedRoute allowedRoles={['gestor']}>
+              <UserDetails />
             </ProtectedRoute>
           } />
 

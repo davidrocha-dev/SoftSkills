@@ -1,10 +1,12 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { FaUser } from 'react-icons/fa';
 import { Modal, Button } from 'react-bootstrap';
 
 const UserListGestor = forwardRef((props, ref) => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -111,6 +113,10 @@ const UserListGestor = forwardRef((props, ref) => {
       setIsSuccess(false);
       setShowResultModal(true);
     }
+  };
+
+  const handleVer = (user) => {
+    navigate(`/user/${user.id}`);
   };
 
   const handleEditar = (user) => {
@@ -400,6 +406,12 @@ const UserListGestor = forwardRef((props, ref) => {
                       </td>
                       <td className="text-center align-middle">
                         <div className="d-flex gap-1 justify-content-center">
+                          <button
+                            className="btn btn-sm btn-outline-info"
+                            onClick={() => handleVer(user)}
+                          >
+                            Ver
+                          </button>
                           <button
                             className={`btn btn-sm ${user.status ? 'btn-outline-danger' : 'btn-outline-success'}`}
                             onClick={() => toggleUserStatus(user.id, user.status)}
