@@ -12,6 +12,8 @@ const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const formadorRoutes = require('./routes/formadorRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const imageRoutes = require('./routes/imageRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const resourceTypeRoutes = require('./routes/resourceTypeRoutes');
 const seed = require('./seed');
 const { sequelize } = require('./models');
 
@@ -44,6 +46,8 @@ app.use('/api/gestor', gestorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/image', imageRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/resource-types', resourceTypeRoutes);
 
 
 app.use((err, req, res, next) => {
