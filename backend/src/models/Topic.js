@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'areaId',
       as: 'area'
     });
+    Topic.hasMany(models.Comment, {
+      foreignKey: 'topicId',
+      as: 'comments'
+    });
   };
 
   return Topic;

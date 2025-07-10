@@ -16,13 +16,13 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id_comentario'
       }
     },
-    workerNumber: {
-      type: DataTypes.STRING(50),
-      field: 'n_trabalhador',
+    userId: {
+      type: DataTypes.INTEGER,
+      field: 'id_utilizador',
       allowNull: false,
       references: {
         model: 'User',
-        key: 'n_trabalhador'
+        key: 'id_utilizador'
       }
     },
     reportDate: {
@@ -44,10 +44,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       field: 'status',
       allowNull: false,
-      defaultValue: false,
-      validate: {
-        isIn: [[0, 1]] // 0=Pendente, 1=Resolvido
-      }
+      defaultValue: false
+      // validação removida para aceitar booleanos
     }
   }, {
     tableName: 'Report',
@@ -63,8 +61,8 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Report.belongsTo(models.User, {
-      foreignKey: 'n_trabalhador',
-      targetKey: 'workerNumber',
+      foreignKey: 'id_utilizador',
+      targetKey: 'id',
       as: 'User'
     });
   };

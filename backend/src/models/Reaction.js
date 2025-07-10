@@ -7,13 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    workerNumber: {
-      type: DataTypes.STRING(50),
-      field: 'n_trabalhador',
+    userId: {
+      type: DataTypes.INTEGER,
+      field: 'id_utilizador',
       allowNull: false,
       references: {
         model: 'User',
-        key: 'n_trabalhador'
+        key: 'id_utilizador'
       }
     },
     commentId: {
@@ -28,10 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     type: {
       type: DataTypes.BOOLEAN,
       field: 'tipo',
-      allowNull: false,
-      validate: {
-        isIn: [[0, 1]] // 0=Dislike, 1=Like
-      }
+      allowNull: false
+      // validação removida para aceitar booleanos
     }
   }, {
     tableName: 'Reaction',
@@ -39,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
     indexes: [
       {
         unique: true,
-        fields: ['n_trabalhador', 'id_comentario'],
+        fields: ['id_utilizador', 'id_comentario'],
         name: 'UC_Raction'
       }
     ]
@@ -48,8 +46,8 @@ module.exports = (sequelize, DataTypes) => {
   // Associações
   Reaction.associate = function(models) {
     Reaction.belongsTo(models.User, {
-      foreignKey: 'n_trabalhador',
-      targetKey: 'workerNumber',
+      foreignKey: 'userId',
+      targetKey: 'id',
       as: 'user'
     });
 

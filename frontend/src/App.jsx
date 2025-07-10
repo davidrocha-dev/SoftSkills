@@ -24,6 +24,8 @@ import Course from './views/Course';
 import EditCourse from './views/EditCourse';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles/main.css';
+import Forum from './views/Forum';
+import ForumTopic from './views/ForumTopic';
 
 
 // Componente para rotas públicas (redireciona se autenticado)
@@ -125,6 +127,18 @@ function App() {
           <Route path="/cursos" element={
             <ProtectedRoute allowedRoles={['gestor']}>
               <CourseList/>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/forum" element={
+            <ProtectedRoute allowedRoles={['gestor','formador','formando']}>
+              <Forum />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/forum/:id" element={
+            <ProtectedRoute allowedRoles={['gestor','formador','formando']}>
+              <ForumTopic />
             </ProtectedRoute>
           } />
 
