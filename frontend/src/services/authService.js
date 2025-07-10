@@ -53,10 +53,14 @@ api.interceptors.response.use(
       // Token expirou ou inválido: limpa credenciais
       localStorage.removeItem('token');
       sessionStorage.removeItem('selectedRole');
-      // Aviso ao utilizador
-      window.alert('Sessão expirada. Por favor, inicie sessão novamente.');
-      // Redireciona para login
-      window.location.href = '/login';
+      // Só mostrar o alert e redirecionar se não estiver na página de login
+      const isLoginPage = window.location.pathname === '/login';
+      if (!isLoginPage) {
+        window.alert('Sessão expirada. Por favor, inicie sessão novamente.');
+        window.location.href = '/login';
+      }
+      // Se já estamos na página de login, apenas rejeita o erro normalmente
+      return Promise.reject(err);
     }
     return Promise.reject(err);
   }
