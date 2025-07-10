@@ -169,7 +169,7 @@ const UserDetails = () => {
                             {enrollment.grade}/100
                           </Badge>
                         ) : (
-                          <span className="text-muted">N/A</span>
+                          <span className="text-muted">Curso Incompleto</span>
                         )}
                       </td>
                     </tr>
