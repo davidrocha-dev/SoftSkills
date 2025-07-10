@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Instância Axios configurada para a API
 export const api = axios.create({
-  baseURL: 'http://localhost:3000/',
+  baseURL: 'http://localhost:3000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -13,17 +13,36 @@ export const api = axios.create({
 // Interceptor para injetar o token em todas as requisições
 api.interceptors.request.use(
   config => {
+    console.log('🔍 [Axios Request] URL:', config.url);
+    console.log('🔍 [Axios Request] Method:', config.method);
+    console.log('🔍 [Axios Request] BaseURL:', config.baseURL);
+    console.log('🔍 [Axios Request] Full URL:', config.baseURL + config.url);
+    console.log('🔍 [Axios Request] Headers:', config.headers);
+    console.log('🔍 [Axios Request] Data:', config.data);
+    
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  err => Promise.reject(err)
+  err => {
+    console.error('🔍 [Axios Request Error]:', err);
+    return Promise.reject(err);
+  }
 );
 
 // Interceptor para tratar respostas de erro (e.g., token expirado)
 api.interceptors.response.use(
-  resp => resp,
+  resp => {
+    console.log('🔍 [Axios Response] Status:', resp.status);
+    console.log('🔍 [Axios Response] Data:', resp.data);
+    return resp;
+  },
   err => {
+    console.error('🔍 [Axios Response Error]:', err);
+    console.error('🔍 [Axios Response Error] Config:', err.config);
+    console.error('🔍 [Axios Response Error] Response:', err.response);
+    console.error('🔍 [Axios Response Error] Request:', err.request);
+    
     // Não redirecionar para login se for uma requisição de primeiro login
     if (err.config.url.includes('/first-login')) {
       return Promise.reject(err);
