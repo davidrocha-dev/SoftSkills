@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id_comentario'
       }
     },
+    ficheiro: {
+      type: DataTypes.STRING(255),
+      field: 'ficheiro',
+      allowNull: true
+    },
     commentDate: {
       type: DataTypes.DATEONLY,
       field: 'Data_Comentario',

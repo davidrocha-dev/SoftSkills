@@ -157,7 +157,7 @@ router.post('/reactions', async (req, res) => {
 // Endpoint para criar um novo comentário associado a um tópico
 router.post('/comments', async (req, res) => {
   try {
-    const { topicId, content, userId, parentCommentId } = req.body;
+    const { topicId, content, userId, parentCommentId, ficheiro } = req.body;
     if (!topicId || !content) {
       return res.status(400).json({ error: 'topicId e content são obrigatórios.' });
     }
@@ -167,7 +167,8 @@ router.post('/comments', async (req, res) => {
       content,
       parentCommentId: parentCommentId || null,
       userId: userId || 1,
-      commentDate: now
+      commentDate: now,
+      ficheiro: ficheiro || null
     });
     res.status(201).json({ success: true, comment });
   } catch (err) {

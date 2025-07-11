@@ -6,42 +6,56 @@ import { useAuth } from '../context/AuthContext';
 import { Container, Card, Spinner, Alert, Button, Modal, Form } from 'react-bootstrap';
 import { BiLike, BiDislike } from 'react-icons/bi';
 import { BiErrorCircle } from 'react-icons/bi';
+import FileUpload from '../components/FileUpload';
 
-function CommentTree({ replies, level = 0, handleReact, handleReply, replyingId, replyContent, setReplyContent, handleSubmitReply, handleReport }) {
+function CommentTree({ replies, level = 0, handleReact, handleReply, handleSubmitReply, handleReport, replyingId }) {
   if (!replies || replies.length === 0) return null;
-  return replies.map(reply => (
-    <div key={reply.id} style={{ marginLeft: level * 32, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e0e0e0', padding: 12, marginBottom: 12 }}>
-      <div className="d-flex align-items-center mb-1">
-        <img src={reply.authorAvatar || '/default-avatar.png'} alt="avatar" className="rounded-circle me-2" width={22} height={22} />
-        <span className="fw-semibold">{reply.authorName}</span>
-        <span className="text-muted small ms-2">{reply.date ? new Date(reply.date).toLocaleDateString('pt-PT') : ''}</span>
+  return replies.map(reply => {
+    const [localReplyContent, setLocalReplyContent] = useState('');
+    const [localFileUrl, setLocalFileUrl] = useState('');
+    const isReplying = replyingId === reply.id;
+    const handleLocalSubmit = (e) => {
+      e.preventDefault();
+      handleSubmitReply(reply.id, localReplyContent, localFileUrl);
+      setLocalReplyContent('');
+      setLocalFileUrl('');
+    };
+    return (
+      <div key={reply.id} style={{ marginLeft: level * 32, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e0e0e0', padding: 12, marginBottom: 12 }}>
+        <div className="d-flex align-items-center mb-1">
+          <img src={reply.authorAvatar || '/default-avatar.png'} alt="avatar" className="rounded-circle me-2" width={22} height={22} />
+          <span className="fw-semibold">{reply.authorName}</span>
+          <span className="text-muted small ms-2">{reply.date ? new Date(reply.date).toLocaleDateString('pt-PT') : ''}</span>
+        </div>
+        <div className="fst-italic text-secondary mb-2">{reply.content}</div>
+        <div className="d-flex align-items-center gap-2 mb-1">
+          <button className="btn btn-xs btn-outline-success d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, true, e)}>
+            <BiLike className="me-1" />
+            <span>{reply.Reaction ? reply.Reaction.filter(r => r.type).length : 0}</span>
+          </button>
+          <button className="btn btn-xs btn-outline-danger d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, false, e)}>
+            <BiDislike className="me-1" />
+            <span>{reply.Reaction ? reply.Reaction.filter(r => !r.type).length : 0}</span>
+          </button>
+          <button className="btn btn-xs btn-outline-primary py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReply(reply.id)}>
+            Responder
+          </button>
+          <button className="btn btn-xs btn-outline-warning py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReport(reply.id)}>
+            <BiErrorCircle />
+          </button>
+        </div>
+        {isReplying && (
+          <form onSubmit={handleLocalSubmit} className="mt-2">
+            <textarea className="form-control mb-2" rows={2} value={localReplyContent} onChange={e => setLocalReplyContent(e.target.value)} required />
+            <FileUpload onUploadSuccess={file => setLocalFileUrl(file.url)} onUploadError={() => setLocalFileUrl('')} uploadType="comment-attachment" />
+            {localFileUrl && <div className="mt-2 small text-success">Ficheiro anexado: <a href={localFileUrl} target="_blank" rel="noopener noreferrer">{localFileUrl}</a></div>}
+            <button type="submit" className="btn btn-sm btn-primary mt-2">Enviar resposta</button>
+          </form>
+        )}
+        <CommentTree replies={reply.replies} level={level + 1} handleReact={handleReact} handleReply={handleReply} handleSubmitReply={handleSubmitReply} handleReport={handleReport} replyingId={replyingId} />
       </div>
-      <div className="fst-italic text-secondary mb-2">{reply.content}</div>
-      <div className="d-flex align-items-center gap-2 mb-1">
-        <button className="btn btn-xs btn-outline-success d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, true, e)}>
-          <BiLike className="me-1" />
-          <span>{reply.Reaction ? reply.Reaction.filter(r => r.type).length : 0}</span>
-        </button>
-        <button className="btn btn-xs btn-outline-danger d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, false, e)}>
-          <BiDislike className="me-1" />
-          <span>{reply.Reaction ? reply.Reaction.filter(r => !r.type).length : 0}</span>
-        </button>
-        <button className="btn btn-xs btn-outline-primary py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReply(reply.id)}>
-          Responder
-        </button>
-        <button className="btn btn-xs btn-outline-warning py-0 px-2 ms-2" style={{ fontSize: 14 }} onClick={() => handleReport(reply.id)}>
-          <BiErrorCircle />
-        </button>
-      </div>
-      {replyingId === reply.id && (
-        <form onSubmit={e => handleSubmitReply(e, reply.id)} className="mt-2">
-          <textarea className="form-control mb-2" rows={2} value={replyContent} onChange={e => setReplyContent(e.target.value)} required />
-          <button type="submit" className="btn btn-sm btn-primary">Enviar resposta</button>
-        </form>
-      )}
-      <CommentTree replies={reply.replies} level={level + 1} handleReact={handleReact} handleReply={handleReply} replyingId={replyingId} replyContent={replyContent} setReplyContent={setReplyContent} handleSubmitReply={handleSubmitReply} handleReport={handleReport} />
-    </div>
-  ));
+    );
+  });
 }
 
 const ForumTopic = () => {
@@ -51,7 +65,8 @@ const ForumTopic = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [replyingId, setReplyingId] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
+  const [mainReplyContent, setMainReplyContent] = useState('');
+  const [mainFileUrl, setMainFileUrl] = useState('');
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportCommentId, setReportCommentId] = useState(null);
   const [reportReason, setReportReason] = useState('');
@@ -95,21 +110,17 @@ const ForumTopic = () => {
 
   const handleReply = (commentId) => {
     setReplyingId(commentId);
-    setReplyContent('');
   };
 
-  const handleSubmitReply = async (e, parentCommentId) => {
-    e.preventDefault();
+  const handleSubmitReply = async (parentCommentId, content, fileUrl) => {
     if (!user) return;
     try {
       await api.post('/forum/comments', {
         topicId: topic.topicId || topic.id,
         parentCommentId,
-        content: replyContent,
+        content: content + (fileUrl ? `\n[Anexo](${fileUrl})` : ''),
         userId: user.id
       });
-      setReplyingId(null);
-      setReplyContent('');
       fetchTopic();
     } catch (err) {
       alert('Erro ao enviar resposta.');
@@ -148,6 +159,14 @@ const ForumTopic = () => {
 
   const main = topic.firstComment;
   const replies = main?.replies || [];
+  const isReplyingMain = replyingId === main.id;
+  const handleMainSubmit = (e) => {
+    e.preventDefault();
+    handleSubmitReply(main.id, mainReplyContent, mainFileUrl);
+    setMainReplyContent('');
+    setMainFileUrl('');
+    setReplyingId(null);
+  };
 
   return (
     <>
@@ -185,8 +204,16 @@ const ForumTopic = () => {
         <h6 className="mb-3">Respostas</h6>
         {replies.length === 0 && <div className="text-muted">Nenhuma resposta ainda.</div>}
         <div className="mb-4">
-          <CommentTree replies={replies} handleReact={handleReact} handleReply={handleReply} replyingId={replyingId} replyContent={replyContent} setReplyContent={setReplyContent} handleSubmitReply={handleSubmitReply} handleReport={handleReport} />
+          <CommentTree replies={replies} handleReact={handleReact} handleReply={handleReply} handleSubmitReply={handleSubmitReply} handleReport={handleReport} replyingId={replyingId} />
         </div>
+        {isReplyingMain && (
+          <form onSubmit={handleMainSubmit} className="mt-2">
+            <textarea className="form-control mb-2" rows={2} value={mainReplyContent} onChange={e => setMainReplyContent(e.target.value)} required />
+            <FileUpload onUploadSuccess={file => setMainFileUrl(file.url)} onUploadError={() => setMainFileUrl('')} uploadType="comment-attachment" />
+            {mainFileUrl && <div className="mt-2 small text-success">Ficheiro anexado: <a href={mainFileUrl} target="_blank" rel="noopener noreferrer">{mainFileUrl}</a></div>}
+            <button type="submit" className="btn btn-sm btn-primary mt-2">Enviar resposta</button>
+          </form>
+        )}
         <Button as={Link} to="/forum" variant="secondary" className="mt-3">Voltar ao Fórum</Button>
       </Container>
       {/* Modal de denúncia */}
