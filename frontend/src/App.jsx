@@ -27,6 +27,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles/main.css';
 import Forum from './views/Forum';
 import ForumTopic from './views/ForumTopic';
+import ForumModeration from './views/ForumModeration';
 
 
 // Componente para rotas públicas (redireciona se autenticado)
@@ -158,6 +159,12 @@ function App() {
           <Route path="/requests" element={
             <ProtectedRoute allowedRoles={['gestor']}>
               <Requests />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/forum-moderation" element={
+            <ProtectedRoute allowedRoles={['gestor']}>
+              <ForumModeration />
             </ProtectedRoute>
           } />
 
