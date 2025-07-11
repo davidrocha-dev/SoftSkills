@@ -28,6 +28,14 @@ function CommentTree({ replies, level = 0, handleReact, handleReply, handleSubmi
           <span className="text-muted small ms-2">{reply.date ? new Date(reply.date).toLocaleDateString('pt-PT') : ''}</span>
         </div>
         <div className="fst-italic text-secondary mb-2">{reply.content}</div>
+        {reply.ficheiro && (
+          <div className="mb-2">
+            <small className="text-muted">Anexo: </small>
+            <a href={reply.ficheiro} target="_blank" rel="noopener noreferrer" className="text-primary">
+              {reply.ficheiro.split('/').pop()}
+            </a>
+          </div>
+        )}
         <div className="d-flex align-items-center gap-2 mb-1">
           <button className="btn btn-xs btn-outline-success d-flex align-items-center py-0 px-2" style={{ fontSize: 14 }} onClick={e => handleReact(reply.id, true, e)}>
             <BiLike className="me-1" />
@@ -47,7 +55,7 @@ function CommentTree({ replies, level = 0, handleReact, handleReply, handleSubmi
         {isReplying && (
           <form onSubmit={handleLocalSubmit} className="mt-2">
             <textarea className="form-control mb-2" rows={2} value={localReplyContent} onChange={e => setLocalReplyContent(e.target.value)} required />
-            <FileUpload onUploadSuccess={file => setLocalFileUrl(file.url)} onUploadError={() => setLocalFileUrl('')} uploadType="comment-attachment" />
+            <FileUpload onUploadSuccess={fileUrl => setLocalFileUrl(fileUrl)} onUploadError={() => setLocalFileUrl('')} uploadType="comment-attachment" acceptedFiles="*" />
             {localFileUrl && <div className="mt-2 small text-success">Ficheiro anexado: <a href={localFileUrl} target="_blank" rel="noopener noreferrer">{localFileUrl}</a></div>}
             <button type="submit" className="btn btn-sm btn-primary mt-2">Enviar resposta</button>
           </form>
@@ -118,7 +126,8 @@ const ForumTopic = () => {
       await api.post('/forum/comments', {
         topicId: topic.topicId || topic.id,
         parentCommentId,
-        content: content + (fileUrl ? `\n[Anexo](${fileUrl})` : ''),
+        content: content,
+        ficheiro: fileUrl || null,
         userId: user.id
       });
       fetchTopic();
@@ -183,6 +192,14 @@ const ForumTopic = () => {
               </div>
             </div>
             <Card.Text className="fst-italic text-secondary mb-3">{main?.content}</Card.Text>
+            {main?.ficheiro && (
+              <div className="mb-3">
+                <small className="text-muted">Anexo: </small>
+                <a href={main.ficheiro} target="_blank" rel="noopener noreferrer" className="text-primary">
+                  {main.ficheiro.split('/').pop()}
+                </a>
+              </div>
+            )}
             <div className="d-flex align-items-center gap-2 mb-2">
               <button className="btn btn-sm btn-outline-success d-flex align-items-center" onClick={e => handleReact(main.id, true, e)}>
                 <BiLike className="me-1" />
@@ -209,7 +226,7 @@ const ForumTopic = () => {
         {isReplyingMain && (
           <form onSubmit={handleMainSubmit} className="mt-2">
             <textarea className="form-control mb-2" rows={2} value={mainReplyContent} onChange={e => setMainReplyContent(e.target.value)} required />
-            <FileUpload onUploadSuccess={file => setMainFileUrl(file.url)} onUploadError={() => setMainFileUrl('')} uploadType="comment-attachment" />
+            <FileUpload onUploadSuccess={fileUrl => setMainFileUrl(fileUrl)} onUploadError={() => setMainFileUrl('')} uploadType="comment-attachment" acceptedFiles="*" />
             {mainFileUrl && <div className="mt-2 small text-success">Ficheiro anexado: <a href={mainFileUrl} target="_blank" rel="noopener noreferrer">{mainFileUrl}</a></div>}
             <button type="submit" className="btn btn-sm btn-primary mt-2">Enviar resposta</button>
           </form>
