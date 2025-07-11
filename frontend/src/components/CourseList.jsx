@@ -141,7 +141,7 @@ const CourseList = () => {
   // Função para fazer upload da imagem
   const uploadImage = async (file) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
 
     try {
       const response = await api.post('/image', formData, {
@@ -160,6 +160,20 @@ const CourseList = () => {
   const handleEditImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validar tipo de ficheiro
+      if (!file.type.startsWith('image/')) {
+        showResult('Por favor, selecione apenas ficheiros de imagem (JPG, PNG, GIF, etc.)', false);
+        return;
+      }
+      
+      // Validar tamanho (5MB máximo)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        showResult('O ficheiro é muito grande. Tamanho máximo: 5MB', false);
+        return;
+      }
+      
       setEditImageFile(file);
       setEditImagePreview(URL.createObjectURL(file));
     }
@@ -226,7 +240,7 @@ const CourseList = () => {
         image: imageUrl
       };
 
-      const response = await api.put(`/cursos/${selectedCourse.id}`, updatedEditData, { 
+      const response = await api.put(`/cursos/id/${selectedCourse.id}`, updatedEditData, { 
         headers: { 'x-selected-role': selectedRole } 
       });
       
@@ -321,6 +335,20 @@ const CourseList = () => {
   const handleCreateImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validar tipo de ficheiro
+      if (!file.type.startsWith('image/')) {
+        showResult('Por favor, selecione apenas ficheiros de imagem (JPG, PNG, GIF, etc.)', false);
+        return;
+      }
+      
+      // Validar tamanho (5MB máximo)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        showResult('O ficheiro é muito grande. Tamanho máximo: 5MB', false);
+        return;
+      }
+      
       setCreateImageFile(file);
       setCreateImagePreview(URL.createObjectURL(file));
     }

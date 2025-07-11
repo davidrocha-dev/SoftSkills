@@ -45,6 +45,9 @@ const CoursesCarousel = ({ courses: propCourses }) => {
               </div>
               <Card.Body className="d-flex flex-column flex-grow-1">
                 <Card.Title className="h5">{course.title}</Card.Title>
+                <div className="mb-2">
+                  <span className={`badge rounded-pill ${course.courseType ? 'bg-info' : 'bg-secondary'}`}>{course.courseType ? 'Síncrono' : 'Assíncrono'}</span>
+                </div>
                 <Card.Text
                   className="flex-grow-1 mb-3 text-wrap"
                   style={{

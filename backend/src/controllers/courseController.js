@@ -440,10 +440,6 @@ exports.updateCourse = async (req, res) => {
   const { title, description, topicId, level, startDate, endDate, vacancies, 
           instructor, status, visible, hours, image, sections } = req.body;
 
-  console.log('Recebido updateCourse:', {
-    id, title, description, topicId, level, startDate, endDate, vacancies, instructor, status, visible, hours, image, sections
-  });
-
   let transaction;
   try {
     transaction = await db.sequelize.transaction();
@@ -456,7 +452,6 @@ exports.updateCourse = async (req, res) => {
 
     if (!updated) {
       await transaction.rollback();
-      console.log('Curso não encontrado para update:', id);
       return res.status(404).json({ message: 'Curso não encontrado' });
     }
 
@@ -465,7 +460,7 @@ exports.updateCourse = async (req, res) => {
     const existingResourceIds = new Set();
 
     // Processar seções
-    if (sections && Array.isArray(sections)) {
+    if (sections && Array.isArray(sections) && sections.length > 0) {
       // Separar seções existentes e novas
       const existingSections = [];
       const newSections = [];
@@ -501,7 +496,6 @@ exports.updateCourse = async (req, res) => {
           status: sectionData.status,
           courseId: id
         }, { transaction });
-        console.log('Nova seção criada:', section.id, section.title);
         existingSectionIds.add(section.id);
       }
       
@@ -521,14 +515,7 @@ exports.updateCourse = async (req, res) => {
 
         // Processar recursos da seção
         for (const resourceData of resources) {
-          console.log('Vai criar recurso:', {
-            title: resourceData.title,
-            file: resourceData.file,
-            sectionId: section.id,
-            typeId: resourceData.typeId
-          });
           try {
-            console.log("XPTO", resourceData);
             const newResource = await Resource.create({
               title: resourceData.title,
               text: resourceData.text,
@@ -539,34 +526,31 @@ exports.updateCourse = async (req, res) => {
               sectionId: section.id
             }, { transaction });
             existingResourceIds.add(newResource.id);
-            console.log('Recurso criado:', newResource.toJSON());
           } catch (err) {
             console.error('Erro ao criar recurso:', err);
           }
         }
       }
+
+      // Remover recursos/seções não enviados
+      await Resource.destroy({
+        where: {
+          sectionId: Array.from(existingSectionIds),
+          id: { [Op.notIn]: Array.from(existingResourceIds) }
+        },
+        transaction
+      });
+
+      await Section.destroy({
+        where: {
+          courseId: id,
+          id: { [Op.notIn]: Array.from(existingSectionIds) }
+        },
+        transaction
+      });
     }
 
-
-    // Remover recursos/seções não enviados
-    await Resource.destroy({
-      where: {
-        sectionId: Array.from(existingSectionIds),
-        id: { [Op.notIn]: Array.from(existingResourceIds) }
-      },
-      transaction
-    });
-
-    await Section.destroy({
-      where: {
-        courseId: id,
-        id: { [Op.notIn]: Array.from(existingSectionIds) }
-      },
-      transaction
-    });
-
     await transaction.commit();
-    console.log('Transação commitada com sucesso!');
 
     // Buscar curso atualizado
     const updatedCourse = await Course.findByPk(id, {
@@ -584,7 +568,6 @@ exports.updateCourse = async (req, res) => {
       }]
     });
 
-    console.log('Update concluído. Curso atualizado:', updatedCourse.id);
     return res.json(updatedCourse);
 
   } catch (error) {
