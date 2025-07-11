@@ -74,7 +74,7 @@ const Forum = () => {
       await api.post('/forum/reactions', {
         commentId,
         type,
-        workerNumber: user.workerNumber
+        userId: user.id
       });
       // Atualiza os tópicos para refletir a reação
       fetchTopics();
