@@ -5,8 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node setup-puppeteer.js && node src/app.js",
-    "dev": "nodemon src/app.js",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "dev": "nodemon src/app.js"
   },
   "keywords": [],
   "author": "",
