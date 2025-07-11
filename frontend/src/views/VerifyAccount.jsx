@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import { Container, Alert, Spinner } from 'react-bootstrap';
+import Loading from '../components/Loading';
 
 const VerifyAccount = () => {
   const [status, setStatus] = useState('verifying');
@@ -52,6 +53,8 @@ const VerifyAccount = () => {
     
     verifyAccount();
   }, [location, navigate]);
+
+  if (loading) return <Loading />;
 
   return (
     <Container className="mt-5 text-center">

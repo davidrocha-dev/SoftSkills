@@ -21,6 +21,7 @@ import {
   FaAudioDescription
 } from 'react-icons/fa';
 import '../assets/styles/course.css';
+import Loading from '../components/Loading';
 
 export default function Course() {
   const { id } = useParams();
@@ -119,17 +120,7 @@ export default function Course() {
   };
 
   if (loading) {
-    return (
-      <>
-        <Header />
-        <Container
-          className="d-flex justify-content-center align-items-center"
-          style={{ height: '80vh' }}
-        >
-          <Spinner animation="border" role="status" />
-        </Container>
-      </>
-    );
+    return <Loading />;
   }
 
   if (error) {

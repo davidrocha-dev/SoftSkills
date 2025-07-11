@@ -6,6 +6,7 @@ import { api } from '../services/authService';
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 
 const GestorRequestsPage = () => {
   const { user } = useAuth();
@@ -46,13 +47,7 @@ const GestorRequestsPage = () => {
   const formatDate = dateString =>
     dateString ? new Date(dateString).toLocaleDateString('pt-PT') : '-';
 
-  if (loading) {
-    return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
-        <Spinner animation="border" role="status" />
-      </Container>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <>

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { api } from '../services/authService';
 import defaultAvatar from '../assets/img/user-img.png';
+import Loading from '../components/Loading';
 
 export default function Profile() {
   const { workerNumber } = useParams();
@@ -36,16 +37,7 @@ export default function Profile() {
       .finally(() => setLoading(false));
   }, [workerNumber, selectedRole]);
 
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <div className="container mt-4">
-          <p>Carregando perfil…</p>
-        </div>
-      </>
-    );
-  }
+  if (loading) return <Loading />;
 
   if (!data.user) {
     return (

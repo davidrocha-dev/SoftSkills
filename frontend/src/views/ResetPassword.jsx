@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 
 const ResetPasswordPage = () => {
   const [search] = useSearchParams();
@@ -65,13 +66,7 @@ const ResetPasswordPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
-        <Spinner animation="border" role="status" />
-      </Container>
-    );
-  }
+  if (loading) return <Loading />;
 
   return (
     <>
