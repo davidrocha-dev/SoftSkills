@@ -1,7 +1,10 @@
-const htmlPdf = require('html-pdf-node');
+const puppeteer = require('puppeteer');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
+
+// Detectar se estamos em produção (Render.com)
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
 
 // Configuração do Cloudinary
 cloudinary.config({
@@ -175,23 +178,20 @@ const generateCertificateHTML = (certificateData) => {
     `;
 };
 
-// Função para gerar PDF usando html-pdf-node com configuração específica para Render
+// Função para gerar PDF usando Puppeteer com configuração específica para Render
 const generateCertificatePDF = async (certificateData) => {
+    let browser = null;
+    let page = null;
+    
     try {
         console.log('🎨 Gerando HTML do certificado...');
         const html = generateCertificateHTML(certificateData);
         
-        console.log('🚀 Iniciando html-pdf-node...');
+        console.log('🚀 Iniciando Puppeteer...');
         
-        const options = {
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '0',
-                right: '0',
-                bottom: '0',
-                left: '0'
-            },
+        // Configuração do Puppeteer baseada no ambiente
+        const launchOptions = {
+            headless: 'new',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -211,13 +211,53 @@ const generateCertificatePDF = async (certificateData) => {
                 '--disable-renderer-backgrounding',
                 '--disable-field-trial-config',
                 '--disable-ipc-flooding-protection'
-            ]
+            ],
+            timeout: 30000
         };
+
+        // Em produção (Render.com), usar configuração específica
+        if (isProduction) {
+            console.log('🏭 Ambiente de produção detectado, usando configuração otimizada...');
+            // O Puppeteer vai baixar automaticamente o Chromium correto
+        }
+
+        browser = await puppeteer.launch(launchOptions);
         
-        const file = { content: html };
+        console.log('📄 Criando nova página...');
+        page = await browser.newPage();
+        
+        page.setDefaultTimeout(30000);
+        page.setDefaultNavigationTimeout(30000);
+        
+        console.log('📏 Definindo viewport...');
+        await page.setViewport({
+            width: 1200,
+            height: 800,
+            deviceScaleFactor: 1
+        });
+        
+        console.log('📝 Carregando HTML na página...');
+        await page.setContent(html, { 
+            waitUntil: 'domcontentloaded',
+            timeout: 30000 
+        });
+        
+        console.log('⏳ Aguardando carregamento completo...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         console.log('📄 Gerando PDF...');
-        const pdfBuffer = await htmlPdf.generatePdf(file, options);
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '0',
+                right: '0',
+                bottom: '0',
+                left: '0'
+            },
+            preferCSSPageSize: true,
+            displayHeaderFooter: false
+        });
         
         console.log(`✅ PDF gerado com sucesso! Tamanho: ${pdfBuffer.length} bytes`);
         return pdfBuffer;
@@ -225,6 +265,24 @@ const generateCertificatePDF = async (certificateData) => {
     } catch (error) {
         console.error('❌ Erro ao gerar PDF:', error);
         throw new Error(`Falha ao gerar certificado PDF: ${error.message}`);
+    } finally {
+        try {
+            if (page && !page.isClosed()) {
+                console.log('🔒 Fechando página...');
+                await page.close();
+            }
+        } catch (error) {
+            console.log('⚠️ Erro ao fechar página:', error.message);
+        }
+        
+        try {
+            if (browser) {
+                console.log('🔒 Fechando browser...');
+                await browser.close();
+            }
+        } catch (error) {
+            console.log('⚠️ Erro ao fechar browser:', error.message);
+        }
     }
 };
 
@@ -298,7 +356,7 @@ const generateAndUploadCertificate = async (certificateData) => {
     let localFilePath = null;
     
     try {
-        console.log('🎯 Iniciando geração e upload do certificado (html-pdf-node simples)...');
+        console.log('🎯 Iniciando geração e upload do certificado (Puppeteer)...');
         
         // 1. Gerar PDF
         const pdfBuffer = await generateCertificatePDF(certificateData);
