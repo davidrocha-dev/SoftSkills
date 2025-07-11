@@ -12,7 +12,9 @@ const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const formadorRoutes = require('./routes/formadorRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const imageRoutes = require('./routes/imageRoutes');
-const forumRoutes = require('./routes/forumRoutes');
+const forumRoutes = require ('./routes/forumRoutes')
+const uploadRoutes = require('./routes/uploadRoutes');
+const resourceTypeRoutes = require('./routes/resourceTypeRoutes');
 const seed = require('./seed');
 const { sequelize } = require('./models');
 
@@ -39,12 +41,14 @@ app.use('/api/areas', areaRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/topicos', topicRoutes);
 app.use('/api/cursos', courseRoutes);
-app.use('/api/inscricoes', enrollmentRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/formador', formadorRoutes);
 app.use('/api/gestor', gestorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/image', imageRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/resource-types', resourceTypeRoutes);
 app.use('/api/forum', forumRoutes);
 
 

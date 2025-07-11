@@ -4,6 +4,7 @@ import { api } from '../services/authService';
 import Header from '../components/Header';
 import { Container, Card, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
+import Loading from '../components/Loading';
 
 const FirstLogin = () => {
   const [newPassword, setNewPassword]       = useState('');
@@ -12,6 +13,7 @@ const FirstLogin = () => {
   const [isSubmitting, setIsSubmitting]     = useState(false);
   const [isValidating, setIsValidating]     = useState(true);
   const [valid, setValid]                   = useState(false);
+  const [loading, setLoading]               = useState(true);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ const FirstLogin = () => {
       .catch(() => navigate('/login', { replace: true }))
       .finally(() => setIsValidating(false));
   }, [token, navigate]);
+
+  if (loading) return <Loading />;
 
   if (isValidating) {
     return (

@@ -3,14 +3,23 @@ import React, { useState } from 'react';
 import { Button, ProgressBar, Alert } from 'react-bootstrap';
 import { api } from '../services/authService';
 
-const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resource', acceptedFiles = "*" }) => {
+const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resource', acceptedFiles = "*", buttonText = "Escolher Arquivo", buttonSize = "sm" }) => {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
+    const [fileInputId] = useState(`file-input-${Math.random().toString(36).substr(2, 9)}`);
 
     const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
+
+    // Validar tipo de arquivo baseado no uploadType
+    if (uploadType === 'course-image') {
+        if (!file.type.startsWith('image/')) {
+            setError('Apenas arquivos de imagem são permitidos');
+            return;
+        }
+    }
 
     // Validar tamanho do arquivo
     const maxSize = uploadType === 'course-image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB para imagens, 10MB para outros
@@ -27,7 +36,10 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
     formData.append('file', file);
 
     try {
-        const response = await api.post(`/upload/${uploadType}`, formData, {
+        // Usar rota diferente baseada no tipo de upload
+        const uploadUrl = uploadType === 'course-image' ? '/image' : '/upload/resource';
+        
+        const response = await api.post(uploadUrl, formData, {
             headers: {
             'Content-Type': 'multipart/form-data',
             },
@@ -38,7 +50,9 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
         });
 
         if (response.data.success) {
-            onUploadSuccess(response.data.file);
+            // Retornar URL baseada no tipo de resposta
+            const fileUrl = response.data.imageUrl || response.data.fileUrl || response.data.url;
+            onUploadSuccess(fileUrl);
         } else {
             setError(response.data.message || 'Erro no upload');
             onUploadError && onUploadError(response.data.message);
@@ -62,15 +76,15 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
         <div className="d-flex align-items-center gap-2">
             <Button
             variant="outline-primary"
-            size="sm"
+            size={buttonSize}
             disabled={uploading}
-            onClick={() => document.getElementById('file-input').click()}
+            onClick={() => document.getElementById(fileInputId).click()}
             >
-            {uploading ? 'Enviando...' : 'Escolher Arquivo'}
+            {uploading ? 'Enviando...' : buttonText}
             </Button>
             
             <input
-            id="file-input"
+            id={fileInputId}
             type="file"
             style={{ display: 'none' }}
             onChange={handleFileUpload}
