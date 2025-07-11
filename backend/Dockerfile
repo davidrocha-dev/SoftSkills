@@ -20,6 +20,9 @@ COPY . .
 # Criar diretório temp para certificados
 RUN mkdir -p temp
 
+# Criar .env se não existir (usando o exemplo)
+RUN if [ ! -f .env ]; then cp env.example .env; fi
+
 # Expor porta
 EXPOSE 3000
 

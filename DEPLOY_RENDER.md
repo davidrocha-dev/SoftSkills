@@ -14,9 +14,12 @@ O backend usa a imagem oficial do Puppeteer que já inclui o Chrome:
 
 ### Variáveis de Ambiente Necessárias
 
-No Render, configure as seguintes variáveis de ambiente:
+#### Para Desenvolvimento Local
+1. Copia o ficheiro `backend/env.example` para `backend/.env`
+2. Edita o `.env` com os teus valores reais
 
-#### Backend
+#### Para Render (Produção)
+No Render, configure as seguintes variáveis de ambiente:
 
 ```
 NODE_ENV=production
@@ -86,18 +89,28 @@ Para ver os logs no Render:
 
 ## Desenvolvimento Local
 
+### Configuração Inicial
+1. Copia o ficheiro de exemplo: `cp backend/env.example backend/.env`
+2. Edita o `backend/.env` com os teus valores reais
+
+### Teste com Docker
 Para testar localmente com Docker:
 
 ```bash
 # Build da imagem
 docker build -t pint2-backend ./backend
 
-# Executar container
+# Executar container (usa o ficheiro .env)
 docker run -p 3000:3000 \
+  --env-file ./backend/.env \
   -e NODE_ENV=production \
-  -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-  -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser-stable \
   pint2-backend
+```
+
+### Teste Automático (Windows)
+Executa o script PowerShell:
+```powershell
+.\test-docker.ps1
 ```
 
 ## Estrutura dos Ficheiros
