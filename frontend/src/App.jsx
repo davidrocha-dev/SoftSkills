@@ -22,6 +22,7 @@ import UserDetails from './components/UserDetails';
 import Course from './views/Course';
 //import Discussion from './components/Discussion';
 import EditCourse from './views/EditCourse';
+import CourseEnrollments from './views/CourseEnrollments';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles/main.css';
 
@@ -172,6 +173,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['gestor','formador']}>
                 <EditCourse/>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/cursos/:id/inscricoes"
+            element={
+              <ProtectedRoute allowedRoles={['gestor','formador']}>
+                <CourseEnrollments/>
               </ProtectedRoute>
             }
           />
