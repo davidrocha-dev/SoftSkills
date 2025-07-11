@@ -1,10 +1,7 @@
-const puppeteer = require('puppeteer-core');
+const htmlPdf = require('html-pdf-node');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
-
-// Detectar se estamos em produção (Render.com)
-const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
 
 // Configuração do Cloudinary
 cloudinary.config({
@@ -178,20 +175,23 @@ const generateCertificateHTML = (certificateData) => {
     `;
 };
 
-// Função para gerar PDF do certificado
+// Função para gerar PDF usando html-pdf-node com configuração específica para Render
 const generateCertificatePDF = async (certificateData) => {
-    let browser = null;
-    let page = null;
-    
     try {
         console.log('🎨 Gerando HTML do certificado...');
         const html = generateCertificateHTML(certificateData);
         
-        console.log('🚀 Iniciando Puppeteer...');
+        console.log('🚀 Iniciando html-pdf-node...');
         
-        // Configuração do Puppeteer baseada no ambiente
-        const launchOptions = {
-            headless: 'new',
+        const options = {
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '0',
+                right: '0',
+                bottom: '0',
+                left: '0'
+            },
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -211,99 +211,13 @@ const generateCertificatePDF = async (certificateData) => {
                 '--disable-renderer-backgrounding',
                 '--disable-field-trial-config',
                 '--disable-ipc-flooding-protection'
-            ],
-            timeout: 30000
+            ]
         };
-
-        // Em produção (Render.com), tentar diferentes caminhos do Chrome
-        if (isProduction) {
-            console.log('🏭 Ambiente de produção detectado, procurando Chrome...');
-            
-            // Lista de possíveis caminhos do Chrome
-            const chromePaths = [
-                '/usr/bin/google-chrome-stable',
-                '/usr/bin/google-chrome',
-                '/usr/bin/chromium-browser',
-                '/usr/bin/chromium',
-                '/snap/bin/chromium',
-                process.env.CHROME_BIN
-            ].filter(Boolean);
-            
-            // Verificar qual caminho existe
-            for (const chromePath of chromePaths) {
-                try {
-                    const fs = require('fs');
-                    if (fs.existsSync(chromePath)) {
-                        console.log(`✅ Chrome encontrado em: ${chromePath}`);
-                        launchOptions.executablePath = chromePath;
-                        break;
-                    }
-                } catch (error) {
-                    console.log(`❌ Chrome não encontrado em: ${chromePath}`);
-                }
-            }
-            
-            if (!launchOptions.executablePath) {
-                console.log('⚠️ Chrome não encontrado, tentando sem executablePath...');
-            }
-        }
-
-        browser = await puppeteer.launch(launchOptions);
         
-        console.log('📄 Criando nova página...');
-        page = await browser.newPage();
-        
-        page.setDefaultTimeout(30000);
-        page.setDefaultNavigationTimeout(30000);
-        
-        console.log('📏 Definindo viewport...');
-        await page.setViewport({
-            width: 1200,
-            height: 800,
-            deviceScaleFactor: 1
-        });
-        
-        console.log('📝 Carregando HTML na página...');
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (retryCount < maxRetries) {
-            try {
-                await page.setContent(html, { 
-                    waitUntil: 'domcontentloaded',
-                    timeout: 30000 
-                });
-                break;
-            } catch (error) {
-                retryCount++;
-                console.log(`⚠️ Tentativa ${retryCount} falhou, tentando novamente...`);
-                if (retryCount >= maxRetries) {
-                    throw error;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-        
-        console.log('⏳ Aguardando carregamento completo...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        if (page.isClosed()) {
-            throw new Error('Página foi fechada inesperadamente');
-        }
+        const file = { content: html };
         
         console.log('📄 Gerando PDF...');
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '0',
-                right: '0',
-                bottom: '0',
-                left: '0'
-            },
-            preferCSSPageSize: true,
-            displayHeaderFooter: false
-        });
+        const pdfBuffer = await htmlPdf.generatePdf(file, options);
         
         console.log(`✅ PDF gerado com sucesso! Tamanho: ${pdfBuffer.length} bytes`);
         return pdfBuffer;
@@ -311,24 +225,6 @@ const generateCertificatePDF = async (certificateData) => {
     } catch (error) {
         console.error('❌ Erro ao gerar PDF:', error);
         throw new Error(`Falha ao gerar certificado PDF: ${error.message}`);
-    } finally {
-        try {
-            if (page && !page.isClosed()) {
-                console.log('🔒 Fechando página...');
-                await page.close();
-            }
-        } catch (error) {
-            console.log('⚠️ Erro ao fechar página:', error.message);
-        }
-        
-        try {
-            if (browser) {
-                console.log('🔒 Fechando browser...');
-                await browser.close();
-            }
-        } catch (error) {
-            console.log('⚠️ Erro ao fechar browser:', error.message);
-        }
     }
 };
 
@@ -402,7 +298,7 @@ const generateAndUploadCertificate = async (certificateData) => {
     let localFilePath = null;
     
     try {
-        console.log('🎯 Iniciando geração e upload do certificado...');
+        console.log('🎯 Iniciando geração e upload do certificado (html-pdf-node simples)...');
         
         // 1. Gerar PDF
         const pdfBuffer = await generateCertificatePDF(certificateData);
@@ -428,6 +324,5 @@ const generateAndUploadCertificate = async (certificateData) => {
 };
 
 module.exports = {
-    generateAndUploadCertificate,
-    generateCertificateHTML
+    generateAndUploadCertificate
 }; 
