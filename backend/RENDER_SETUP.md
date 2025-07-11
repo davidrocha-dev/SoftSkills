@@ -6,18 +6,18 @@ O Puppeteer precisava do Chrome instalado para gerar PDFs. No ambiente do Render
 
 ## Solução Implementada
 
-### Abordagem Simplificada
+### Abordagem Otimizada
 
-- **Removemos a dependência do Chrome** completamente
-- **Usamos apenas `html-pdf-node`** que funciona sem instalação adicional
+- **Usamos Puppeteer** com configuração específica para Render
+- **Download automático do Chromium** correto durante a instalação
 - **Configuração otimizada** para o ambiente do Render.com
 
 ### Arquivos Modificados
 
 1. **`certificateServiceSimple.js`** - Novo serviço principal
 
-   - Usa apenas `html-pdf-node`
-   - Configuração otimizada para Render
+   - Usa Puppeteer com configuração otimizada
+   - Download automático do Chromium correto
    - Argumentos de linha de comando para estabilidade
 
 2. **`certificateController.js`** - Simplificado
@@ -25,9 +25,10 @@ O Puppeteer precisava do Chrome instalado para gerar PDFs. No ambiente do Render
    - Remove lógica de fallback complexa
    - Usa apenas o serviço simples
 
-3. **`package.json`** - Dependências limpas
-   - Remove `puppeteer` (mantém apenas `puppeteer-core` para compatibilidade)
-   - Mantém `html-pdf-node`
+3. **`package.json`** - Dependências otimizadas
+   - Inclui `puppeteer` para download automático do Chromium
+   - Mantém `puppeteer-core` para compatibilidade
+   - Mantém `html-pdf-node` como alternativa
 
 ## Configuração no Render Dashboard
 
@@ -57,8 +58,8 @@ npm start
 
 ## Como Funciona Agora
 
-1. **Geração de PDF**: Usa `html-pdf-node` diretamente
-2. **Sem dependência do Chrome**: Não precisa instalar Chrome no servidor
+1. **Geração de PDF**: Usa Puppeteer com Chromium automático
+2. **Download automático**: O Puppeteer baixa o Chromium correto durante `npm install`
 3. **Configuração otimizada**: Argumentos específicos para estabilidade no Render
 4. **Upload para Cloudinary**: Funciona normalmente
 
@@ -67,9 +68,14 @@ npm start
 Após o deploy, teste a geração de certificados. Os logs devem mostrar:
 
 ```
-🎯 Iniciando geração e upload do certificado (html-pdf-node simples)...
+🎯 Iniciando geração e upload do certificado (Puppeteer)...
 🎨 Gerando HTML do certificado...
-🚀 Iniciando html-pdf-node...
+🚀 Iniciando Puppeteer...
+🏭 Ambiente de produção detectado, usando configuração otimizada...
+📄 Criando nova página...
+📏 Definindo viewport...
+📝 Carregando HTML na página...
+⏳ Aguardando carregamento completo...
 📄 Gerando PDF...
 ✅ PDF gerado com sucesso! Tamanho: XXXX bytes
 ☁️ Fazendo upload para Cloudinary...
@@ -79,10 +85,10 @@ Após o deploy, teste a geração de certificados. Os logs devem mostrar:
 
 ## Vantagens da Nova Abordagem
 
-1. **Simplicidade**: Menos dependências, menos pontos de falha
-2. **Confiabilidade**: Funciona consistentemente no Render
-3. **Performance**: Mais rápido, menos recursos necessários
-4. **Manutenção**: Código mais simples de manter
+1. **Confiabilidade**: Puppeteer com Chromium automático
+2. **Simplicidade**: Download automático durante instalação
+3. **Performance**: Configuração otimizada para Render
+4. **Manutenção**: Código robusto e bem estruturado
 
 ## Troubleshooting
 
@@ -94,6 +100,7 @@ Após o deploy, teste a geração de certificados. Os logs devem mostrar:
 
 ## Dependências
 
-- `html-pdf-node`: Para geração de PDFs
+- `puppeteer`: Para geração de PDFs com Chromium automático
 - `cloudinary`: Para upload dos PDFs
-- `puppeteer-core`: Mantido para compatibilidade (não usado ativamente)
+- `puppeteer-core`: Mantido para compatibilidade
+- `html-pdf-node`: Mantido como alternativa
