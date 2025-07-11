@@ -24,6 +24,8 @@ const Forum = () => {
   const [createError, setCreateError] = useState('');
   const [topicOptions, setTopicOptions] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
+  // 1. Adiciona um estado para a mensagem de sucesso
+  const [pendingMsg, setPendingMsg] = useState('');
 
   useEffect(() => {
     fetchTopics();
@@ -106,6 +108,13 @@ const Forum = () => {
   return (
     <>
       <Header />
+      {pendingMsg && (
+        <div className="d-flex justify-content-center">
+          <Alert variant="info" onClose={() => setPendingMsg('')} dismissible className="mt-3 w-100" style={{ maxWidth: 480 }}>
+            {pendingMsg}
+          </Alert>
+        </div>
+      )}
       <Container className="py-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold mb-0">Fórum</h2>
@@ -191,9 +200,11 @@ const Forum = () => {
                 content: newTopicContent,
                 userId: user?.id
               });
+              // 2. No onSubmit do Form do modal, após criar o comentário com sucesso:
               setShowModal(false);
               setSelectedTopic(null);
               setNewTopicContent('');
+              setPendingMsg('Comentário enviado e está a aguardar aprovação de um gestor.');
               fetchTopics();
             } catch (err) {
               setCreateError('Erro ao criar comentário.');
