@@ -1,35 +1,33 @@
 # Configuração do Render.com para PINT2 Backend
 
-## Problema
+## Problema Resolvido ✅
 
-O Puppeteer precisa do Chrome instalado para gerar PDFs. No ambiente do Render.com, o Chrome não vem pré-instalado.
+O Puppeteer precisava do Chrome instalado para gerar PDFs. No ambiente do Render.com, o Chrome não vem pré-instalado.
 
-## Soluções Implementadas
+## Solução Implementada
 
-### 1. Configuração do Puppeteer
+### Abordagem Simplificada
 
-- Mudamos de `puppeteer` para `puppeteer-core`
-- Adicionamos detecção automática do ambiente de produção
-- Em produção, usa o Chrome do sistema (`/usr/bin/google-chrome-stable`)
+- **Removemos a dependência do Chrome** completamente
+- **Usamos apenas `html-pdf-node`** que funciona sem instalação adicional
+- **Configuração otimizada** para o ambiente do Render.com
 
-### 2. Instalação do Chrome no Render
+### Arquivos Modificados
 
-O arquivo `render.yaml` já está configurado para instalar o Chrome durante o build:
+1. **`certificateServiceSimple.js`** - Novo serviço principal
 
-```yaml
-buildCommand: |
-  npm install
-  apt-get update
-  apt-get install -y wget gnupg
-  wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-  sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-  apt-get update
-  apt-get install -y google-chrome-stable
-```
+   - Usa apenas `html-pdf-node`
+   - Configuração otimizada para Render
+   - Argumentos de linha de comando para estabilidade
 
-### 3. Fallback com html-pdf-node
+2. **`certificateController.js`** - Simplificado
 
-Se o Puppeteer falhar, o sistema automaticamente tenta usar `html-pdf-node` como alternativa.
+   - Remove lógica de fallback complexa
+   - Usa apenas o serviço simples
+
+3. **`package.json`** - Dependências limpas
+   - Remove `puppeteer` (mantém apenas `puppeteer-core` para compatibilidade)
+   - Mantém `html-pdf-node`
 
 ## Configuração no Render Dashboard
 
@@ -47,10 +45,8 @@ CLOUDINARY_API_SECRET=seu_api_secret
 
 ### Build Command
 
-Se não estiver usando o `render.yaml`, configure manualmente:
-
 ```
-npm install && apt-get update && apt-get install -y wget gnupg && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && apt-get update && apt-get install -y google-chrome-stable
+npm install
 ```
 
 ### Start Command
@@ -59,32 +55,38 @@ npm install && apt-get update && apt-get install -y wget gnupg && wget -q -O - h
 npm start
 ```
 
+## Como Funciona Agora
+
+1. **Geração de PDF**: Usa `html-pdf-node` diretamente
+2. **Sem dependência do Chrome**: Não precisa instalar Chrome no servidor
+3. **Configuração otimizada**: Argumentos específicos para estabilidade no Render
+4. **Upload para Cloudinary**: Funciona normalmente
+
 ## Teste
 
 Após o deploy, teste a geração de certificados. Os logs devem mostrar:
 
-1. **Sucesso com Puppeteer:**
+```
+🎯 Iniciando geração e upload do certificado (html-pdf-node simples)...
+🎨 Gerando HTML do certificado...
+🚀 Iniciando html-pdf-node...
+📄 Gerando PDF...
+✅ PDF gerado com sucesso! Tamanho: XXXX bytes
+☁️ Fazendo upload para Cloudinary...
+✅ Upload para Cloudinary concluído!
+🎉 Certificado gerado e enviado para Cloudinary com sucesso!
+```
 
-   ```
-   🏭 Ambiente de produção detectado, usando Chrome do sistema...
-   ✅ PDF gerado com Puppeteer e enviado para Cloudinary
-   ```
+## Vantagens da Nova Abordagem
 
-2. **Fallback para html-pdf-node:**
-   ```
-   ⚠️ Puppeteer falhou, tentando com html-pdf-node...
-   ✅ PDF gerado com html-pdf-node e enviado para Cloudinary
-   ```
+1. **Simplicidade**: Menos dependências, menos pontos de falha
+2. **Confiabilidade**: Funciona consistentemente no Render
+3. **Performance**: Mais rápido, menos recursos necessários
+4. **Manutenção**: Código mais simples de manter
 
 ## Troubleshooting
 
-### Se o Chrome não for encontrado:
-
-1. Verifique se o build command foi executado corretamente
-2. Confirme que a variável `NODE_ENV=production` está definida
-3. Verifique os logs do build no Render
-
-### Se ambos os métodos falharem:
+### Se ainda houver problemas:
 
 1. Verifique as configurações do Cloudinary
 2. Confirme que o diretório `/tmp` tem permissões de escrita
@@ -92,6 +94,6 @@ Após o deploy, teste a geração de certificados. Os logs devem mostrar:
 
 ## Dependências
 
-- `puppeteer-core`: Para usar o Chrome do sistema
-- `html-pdf-node`: Como fallback
+- `html-pdf-node`: Para geração de PDFs
 - `cloudinary`: Para upload dos PDFs
+- `puppeteer-core`: Mantido para compatibilidade (não usado ativamente)

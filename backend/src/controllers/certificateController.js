@@ -1,6 +1,5 @@
 const { Certificate, User, Course, Enrollment } = require('../models');
-const { generateAndUploadCertificate } = require('../services/certificateService');
-const { generateAndUploadCertificate: generateAndUploadCertificateLocal } = require('../services/certificateServiceLocal');
+const { generateAndUploadCertificate } = require('../services/certificateServiceSimple');
 
 // Listar inscritos de um curso para emissão de certificados
 const getCourseEnrollments = async (req, res) => {
@@ -168,28 +167,9 @@ const issueCertificate = async (req, res) => {
 
             // Gerar PDF e fazer upload para Cloudinary
             console.log('☁️ Fazendo upload para Cloudinary...');
-            let pdfUrl;
+            const pdfUrl = await generateAndUploadCertificate(certificateData);
             
-            try {
-                // Tentar primeiro com Puppeteer
-                pdfUrl = await generateAndUploadCertificate(certificateData);
-                console.log('✅ PDF gerado com Puppeteer e enviado para Cloudinary');
-            } catch (puppeteerError) {
-                console.log('⚠️ Puppeteer falhou, tentando com html-pdf-node...');
-                console.log('   - Erro Puppeteer:', puppeteerError.message);
-                
-                try {
-                    // Fallback para html-pdf-node
-                    pdfUrl = await generateAndUploadCertificateLocal(certificateData);
-                    console.log('✅ PDF gerado com html-pdf-node e enviado para Cloudinary');
-                } catch (htmlPdfError) {
-                    console.error('❌ Ambos os métodos falharam:');
-                    console.error('   - Puppeteer:', puppeteerError.message);
-                    console.error('   - html-pdf-node:', htmlPdfError.message);
-                    throw new Error(`Falha ao gerar PDF: Puppeteer (${puppeteerError.message}) e html-pdf-node (${htmlPdfError.message})`);
-                }
-            }
-            
+            console.log('✅ PDF gerado e enviado para Cloudinary');
             console.log('   - URL:', pdfUrl);
 
             // Atualizar o certificado com o link do PDF

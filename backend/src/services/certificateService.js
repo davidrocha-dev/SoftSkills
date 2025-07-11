@@ -215,10 +215,37 @@ const generateCertificatePDF = async (certificateData) => {
             timeout: 30000
         };
 
-        // Em produção (Render.com), usar o Chrome do sistema
+        // Em produção (Render.com), tentar diferentes caminhos do Chrome
         if (isProduction) {
-            console.log('🏭 Ambiente de produção detectado, usando Chrome do sistema...');
-            launchOptions.executablePath = '/usr/bin/google-chrome-stable';
+            console.log('🏭 Ambiente de produção detectado, procurando Chrome...');
+            
+            // Lista de possíveis caminhos do Chrome
+            const chromePaths = [
+                '/usr/bin/google-chrome-stable',
+                '/usr/bin/google-chrome',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
+                '/snap/bin/chromium',
+                process.env.CHROME_BIN
+            ].filter(Boolean);
+            
+            // Verificar qual caminho existe
+            for (const chromePath of chromePaths) {
+                try {
+                    const fs = require('fs');
+                    if (fs.existsSync(chromePath)) {
+                        console.log(`✅ Chrome encontrado em: ${chromePath}`);
+                        launchOptions.executablePath = chromePath;
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`❌ Chrome não encontrado em: ${chromePath}`);
+                }
+            }
+            
+            if (!launchOptions.executablePath) {
+                console.log('⚠️ Chrome não encontrado, tentando sem executablePath...');
+            }
         }
 
         browser = await puppeteer.launch(launchOptions);
