@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
@@ -9,171 +10,6 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
-// Função para gerar HTML do certificado
-const generateCertificateHTML = (certificateData) => {
-    const { userName, courseTitle, grade, issueDate, certificateId } = certificateData;
-    
-    return `
-    <!DOCTYPE html>
-    <html lang="pt">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Certificado - ${userName}</title>
-        <style>
-            @page {
-                size: A4;
-                margin: 0;
-            }
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Arial', sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            .certificate {
-                width: 210mm;
-                height: 297mm;
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                position: relative;
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                padding: 40px;
-                box-sizing: border-box;
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 40px;
-            }
-            .logo {
-                font-size: 24px;
-                font-weight: bold;
-                color: #3498db;
-                margin-bottom: 10px;
-            }
-            .title {
-                font-size: 48px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin-bottom: 5px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-            }
-            .subtitle {
-                font-size: 18px;
-                color: #7f8c8d;
-                font-style: italic;
-            }
-            .content {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                padding: 40px 0;
-            }
-            .description {
-                font-size: 20px;
-                color: #34495e;
-                margin-bottom: 20px;
-                line-height: 1.6;
-            }
-            .name {
-                font-size: 36px;
-                font-weight: bold;
-                color: #3498db;
-                margin: 20px 0;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-            .course-title {
-                font-size: 28px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin: 20px 0;
-                line-height: 1.4;
-            }
-            .grade {
-                font-size: 22px;
-                color: #34495e;
-                margin: 20px 0;
-            }
-            .grade strong {
-                color: #27ae60;
-                font-size: 26px;
-            }
-            .footer {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 14px;
-                color: #7f8c8d;
-            }
-            .date {
-                text-align: left;
-            }
-            .certificate-id {
-                text-align: right;
-            }
-            .border-decoration {
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                right: 20px;
-                bottom: 20px;
-                border: 2px solid #3498db;
-                border-radius: 15px;
-                pointer-events: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="certificate">
-            <div class="border-decoration"></div>
-            <div class="header">
-                <div class="logo">Softinsa - Plataforma de Formação</div>
-                <div class="title">Certificado</div>
-                <div class="subtitle">de Conclusão de Curso</div>
-            </div>
-            
-            <div class="content">
-                <div class="description">
-                    Certificamos que
-                </div>
-                <div class="name">${userName}</div>
-                <div class="description">
-                    concluiu com sucesso o curso
-                </div>
-                <div class="course-title">${courseTitle}</div>
-                <div class="grade">
-                    com a classificação de <strong>${grade}/20</strong>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <div class="date">
-                    <strong>Data de Emissão:</strong><br>
-                    ${issueDate}
-                </div>
-                <div class="certificate-id">
-                    <strong>ID:</strong> ${certificateId}
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
-};
 
 // Função para gerar PDF do certificado
 const generateCertificatePDF = async (certificateData) => {
@@ -186,10 +22,12 @@ const generateCertificatePDF = async (certificateData) => {
         
         console.log('🚀 Iniciando Puppeteer...');
         browser = await puppeteer.launch({
+            executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
             headless: 'new',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
+                '--single-process',
                 '--disable-dev-shm-usage',
                 '--disable-accelerated-2d-canvas',
                 '--no-first-run',
