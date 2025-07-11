@@ -55,6 +55,7 @@ router.get('/topics', async (req, res) => {
           .map(reply => ({
             id: reply.id,
             content: reply.content,
+            ficheiro: reply.ficheiro,
             authorName: reply.user?.name || 'Desconhecido',
             authorAvatar: reply.user?.pfp || '',
             date: reply.commentDate,
@@ -88,6 +89,7 @@ router.get('/topics', async (req, res) => {
         firstComment: {
           id: comment.id,
           content: comment.content,
+          ficheiro: comment.ficheiro,
           authorName: comment.user?.name || 'Desconhecido',
           authorAvatar: comment.user?.pfp || '',
           authorId: comment.user?.id || null,
