@@ -16,11 +16,20 @@ router.get(
   controller.getEnrolledCoursesByUser
 );
 
+// Lista inscrições de um curso específico
+router.get('/curso/:courseId', controller.getEnrollmentsByCourse);
+
 // Cria uma inscrição
 router.post(
   '/',
   authorize(['gestor','formador','formando']),
   controller.createEnrollment
 );
+
+// Atualiza o status de uma inscrição
+router.patch('/:id', controller.updateEnrollmentStatus);
+
+// Remove uma inscrição
+router.delete('/:id', controller.deleteEnrollment);
 
 module.exports = router;

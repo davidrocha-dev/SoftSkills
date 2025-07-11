@@ -34,10 +34,23 @@ export default function Course() {
   const [showMore, setShowMore]                 = useState(false);
   const [showToggle, setShowToggle]             = useState(false);
   const descRef = useRef(null);
+  // Adicionar estado para enrollmentStatus
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
 
   // Função para ordenar os recursos pela "order"
   const getSortedResources = (resources) => {
     return [...resources].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  };
+
+  // Função para formatar datas em dd/mm/yyyy
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   useEffect(() => {
@@ -49,6 +62,7 @@ export default function Course() {
         setCourse(data.course);
         setTotalEnrollments(data.totalEnrollments);
         setIsEnrolled(data.isEnrolled);
+        setEnrollmentStatus(data.enrollmentStatus);
       
 
       } catch (err) {
@@ -75,11 +89,12 @@ export default function Course() {
       };
       console.log('Enviando dados para inscrição:', requestBody);  // Adicione o log para verificar os dados
       await api.post(
-        '/inscricoes/create',
+        '/enrollments/',
         requestBody,
         { headers }
       );
       setIsEnrolled(true);
+      setEnrollmentStatus('Pendente');
       setTotalEnrollments(prev => prev + 1);
     } catch (err) {
       console.error('Erro ao inscrever no curso', err);
@@ -147,6 +162,11 @@ const isFull = totalEnrollments >= vacancies;
 // A constante `disableEnroll` já considera ambas as condições.
 const disableEnroll = isEnrolled || (vacancies !== Infinity && totalEnrollments >= vacancies);
 
+// Adicionar variável para verificar se é o formador
+const isInstructor = user?.workerNumber && course?.instructor && user.workerNumber === course.instructor;
+
+console.log('user.workerNumber:', user?.workerNumber, 'course.instructor:', course?.instructor);
+
 return (
   <>
     <Header />
@@ -154,17 +174,27 @@ return (
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-start">
           <h4 className="mb-1">{course.title}</h4>
-          <Button
-            variant={isEnrolled ? 'secondary' : 'primary'}
-            disabled={disableEnroll}
-            onClick={!disableEnroll ? handleEnroll : undefined}
-            style={{ 
-              cursor: disableEnroll ? 'default' : 'pointer',
-              opacity: disableEnroll ? 0.65 : 1 
-            }}
-          >
-            {isEnrolled ? 'Inscrito' : 'Inscrever'}
-          </Button>
+          {isInstructor ? (
+            <Button
+              variant="primary"
+              onClick={() => window.location.href = `/cursos/${id}/edit`}
+              style={{ cursor: 'pointer' }}
+            >
+              Editar Curso
+            </Button>
+          ) : (
+            <Button
+              variant={isEnrolled ? (enrollmentStatus === 'Pendente' ? 'warning' : 'secondary') : 'primary'}
+              disabled={isEnrolled || disableEnroll}
+              onClick={(!isEnrolled && !disableEnroll) ? handleEnroll : undefined}
+              style={{ 
+                cursor: (isEnrolled || disableEnroll) ? 'default' : 'pointer',
+                opacity: (isEnrolled || disableEnroll) ? 0.65 : 1 
+              }}
+            >
+              {isEnrolled ? (enrollmentStatus === 'Pendente' ? 'Pendente' : 'Inscrito') : 'Inscrever'}
+            </Button>
+          )}
         </Card.Header>
 
           <Card.Body>
@@ -211,11 +241,11 @@ return (
                   )}
                   <Col className="col-auto">
                     <strong>Início:</strong>{' '}
-                    {new Date(course.startDate).toLocaleDateString()}
+                    {formatDate(course.startDate)}
                   </Col>
                   <Col className="col-auto">
                     <strong>Fim:</strong>{' '}
-                    {new Date(course.endDate).toLocaleDateString()}
+                    {formatDate(course.endDate)}
                   </Col>
                   <Col className="col-auto">
                     <strong>Inscrições:</strong>{' '}
@@ -226,18 +256,17 @@ return (
             </Row>
 
             {/* Mostrar sempre as seções do curso */}
-            {course.sections && course.sections.length > 0 ? (
-              <Accordion defaultActiveKey="0" className="w-100 mt-4">
-                {getSortedResources(course.sections).map((sec, idx) => (
-                  <Accordion.Item eventKey={String(idx)} key={sec.id}>
-                    <Accordion.Header>
-                      Seção {sec.order}: {sec.title}
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      {isEnrolled ? (
-                        sec.resources.length === 0 ? (
-                          <p>Nenhum recurso nesta seção.</p>
-                        ) : (
+            {((isEnrolled && enrollmentStatus === 'Ativo') || isInstructor) ? (
+              course.sections && course.sections.length > 0 ? (
+                <Accordion className="w-100 mt-4">
+                  {getSortedResources(course.sections)
+                    .filter(sec => sec.status)
+                    .map((sec, idx) => (
+                      <Accordion.Item eventKey={String(idx)} key={sec.id}>
+                        <Accordion.Header>
+                          Seção {idx + 1}: {sec.title}
+                        </Accordion.Header>
+                        <Accordion.Body>
                           <ListGroup variant="flush">
                             {getSortedResources(sec.resources).map(res => (
                               <ListGroup.Item
@@ -250,8 +279,35 @@ return (
                                   {res.resourceType?.type === 3 && <FaLink />}
                                 </span>
                                 <div className="flex-grow-1">
-                                  <strong>{res.nome_recurso || res.title || 'Sem título'}</strong>
-                                  {res.text && <p>{res.text}</p>}
+                                  {res.text ? (
+                                    <>
+                                      <strong>{res.nome_recurso || res.title || 'Sem título'}</strong>
+                                      <p>{res.text}</p>
+                                      {(res.file || res.link) && (
+                                        <a
+                                          href={res.file || res.link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          style={{ textDecoration: 'underline', cursor: 'pointer', display: 'inline-block', marginTop: 4 }}
+                                        >
+                                          {res.nome_recurso || res.title || 'Sem título'}
+                                        </a>
+                                      )}
+                                    </>
+                                  ) : (
+                                    (res.file || res.link) ? (
+                                      <a
+                                        href={res.file || res.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ textDecoration: 'underline', cursor: 'pointer', display: 'inline-block' }}
+                                      >
+                                        {res.nome_recurso || res.title || 'Sem título'}
+                                      </a>
+                                    ) : (
+                                      <strong>{res.nome_recurso || res.title || 'Sem título'}</strong>
+                                    )
+                                  )}
                                   {res.link && (
                                     <a
                                       href={res.link}
@@ -270,18 +326,23 @@ return (
                               </ListGroup.Item>
                             ))}
                           </ListGroup>
-                        )
-                      ) : (
-                        <Alert variant="info" className="mb-0">
-                          Faça a sua inscrição para ver os recursos desta seção.
-                        </Alert>
-                      )}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                ))}
-              </Accordion>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))}
+                </Accordion>
+              ) : (
+                <p className="mt-4">Nenhuma seção disponível.</p>
+              )
             ) : (
-              <p className="mt-4">Nenhuma seção disponível.</p>
+              isEnrolled && enrollmentStatus === 'Pendente' ? (
+                <Alert variant="info" className="mt-4">
+                  Sua inscrição está pendente de aprovação. Aguarde a validação do formador.
+                </Alert>
+              ) : (
+                <Alert variant="warning" className="mt-4">
+                  Apenas alunos inscritos com inscrição ativa ou o formador podem ver os conteúdos deste curso.
+                </Alert>
+              )
             )}
           </Card.Body>
         </Card>
