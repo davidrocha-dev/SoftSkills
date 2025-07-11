@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+const PDFDocument = require('pdfkit');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
@@ -175,111 +175,136 @@ const generateCertificateHTML = (certificateData) => {
     `;
 };
 
-// Função para gerar PDF do certificado
+// Função para gerar PDF do certificado usando PDFKit
 const generateCertificatePDF = async (certificateData) => {
-    let browser = null;
-    let page = null;
+    const { userName, courseTitle, grade, issueDate, certificateId } = certificateData;
     
     try {
-        console.log('🎨 Gerando HTML do certificado...');
-        const html = generateCertificateHTML(certificateData);
+        console.log('🎨 Gerando PDF do certificado com PDFKit...');
         
-        console.log('🚀 Iniciando Puppeteer...');
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--no-first-run',
-                '--no-zygote',
-                '--disable-gpu',
-                '--disable-web-security',
-                '--disable-features=VizDisplayCompositor'
-            ],
-            timeout: 30000
-        });
-        
-        console.log('📄 Criando nova página...');
-        page = await browser.newPage();
-        
-        page.setDefaultTimeout(30000);
-        page.setDefaultNavigationTimeout(30000);
-        
-        console.log('📏 Definindo viewport...');
-        await page.setViewport({
-            width: 1200,
-            height: 800,
-            deviceScaleFactor: 1
-        });
-        
-        console.log('📝 Carregando HTML na página...');
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        while (retryCount < maxRetries) {
-            try {
-                await page.setContent(html, { 
-                    waitUntil: 'domcontentloaded',
-                    timeout: 30000 
-                });
-                break;
-            } catch (error) {
-                retryCount++;
-                console.log(`⚠️ Tentativa ${retryCount} falhou, tentando novamente...`);
-                if (retryCount >= maxRetries) {
-                    throw error;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
+        // Criar um novo documento PDF
+        const doc = new PDFDocument({
+            size: 'A4',
+            layout: 'portrait',
+            margins: {
+                top: 50,
+                bottom: 50,
+                left: 50,
+                right: 50
             }
-        }
-        
-        console.log('⏳ Aguardando carregamento completo...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        if (page.isClosed()) {
-            throw new Error('Página foi fechada inesperadamente');
-        }
-        
-        console.log('📄 Gerando PDF...');
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: {
-                top: '0',
-                right: '0',
-                bottom: '0',
-                left: '0'
-            },
-            preferCSSPageSize: true,
-            displayHeaderFooter: false
         });
+
+        // Criar um buffer para armazenar o PDF
+        const chunks = [];
+        doc.on('data', chunk => chunks.push(chunk));
         
-        console.log(`✅ PDF gerado com sucesso! Tamanho: ${pdfBuffer.length} bytes`);
-        return pdfBuffer;
+        // Configurar fontes e estilos
+        doc.font('Helvetica');
+        
+        // Adicionar fundo gradiente (simulado com retângulos)
+        doc.rect(0, 0, doc.page.width, doc.page.height)
+           .fill('#667eea');
+        
+        // Adicionar retângulo branco para o certificado
+        const margin = 30;
+        const certWidth = doc.page.width - (margin * 2);
+        const certHeight = doc.page.height - (margin * 2);
+        
+        doc.rect(margin, margin, certWidth, certHeight)
+           .fill('white')
+           .stroke('#3498db', 2);
+        
+        // Posicionar conteúdo
+        let y = margin + 60;
+        
+        // Cabeçalho
+        doc.fontSize(24)
+           .fill('#3498db')
+           .text('Softinsa - Plataforma de Formação', doc.page.width / 2, y, { align: 'center' });
+        
+        y += 40;
+        doc.fontSize(48)
+           .fill('#2c3e50')
+           .text('CERTIFICADO', doc.page.width / 2, y, { align: 'center' });
+        
+        y += 30;
+        doc.fontSize(18)
+           .fill('#7f8c8d')
+           .text('de Conclusão de Curso', doc.page.width / 2, y, { align: 'center' });
+        
+        // Conteúdo principal
+        y += 80;
+        doc.fontSize(20)
+           .fill('#34495e')
+           .text('Certificamos que', doc.page.width / 2, y, { align: 'center' });
+        
+        y += 40;
+        doc.fontSize(36)
+           .fill('#3498db')
+           .text(userName.toUpperCase(), doc.page.width / 2, y, { align: 'center' });
+        
+        y += 50;
+        doc.fontSize(20)
+           .fill('#34495e')
+           .text('concluiu com sucesso o curso', doc.page.width / 2, y, { align: 'center' });
+        
+        y += 40;
+        doc.fontSize(28)
+           .fill('#2c3e50')
+           .text(courseTitle, doc.page.width / 2, y, { align: 'center' });
+        
+        y += 50;
+        doc.fontSize(22)
+           .fill('#34495e')
+           .text(`com a classificação de `, doc.page.width / 2, y, { align: 'center' });
+        
+        y += 30;
+        doc.fontSize(26)
+           .fill('#27ae60')
+           .text(`${grade}/20`, doc.page.width / 2, y, { align: 'center' });
+        
+        // Rodapé
+        y = doc.page.height - margin - 80;
+        
+        // Data de emissão
+        doc.fontSize(14)
+           .fill('#7f8c8d')
+           .text('Data de Emissão:', margin + 20, y);
+        
+        y += 20;
+        doc.fontSize(14)
+           .fill('#2c3e50')
+           .text(issueDate, margin + 20, y);
+        
+        // ID do certificado
+        doc.fontSize(14)
+           .fill('#7f8c8d')
+           .text('ID:', doc.page.width - margin - 100, y - 20, { align: 'right' });
+        
+        doc.fontSize(14)
+           .fill('#2c3e50')
+           .text(certificateId, doc.page.width - margin - 20, y - 20, { align: 'right' });
+        
+        // Finalizar o documento
+        doc.end();
+        
+        // Aguardar o documento ser finalizado
+        return new Promise((resolve, reject) => {
+            doc.on('end', () => {
+                const pdfBuffer = Buffer.concat(chunks);
+                console.log(`✅ PDF gerado com sucesso! Tamanho: ${pdfBuffer.length} bytes`);
+                resolve(pdfBuffer);
+            });
+            
+            doc.on('error', (error) => {
+                console.error('❌ Erro ao gerar PDF:', error);
+                reject(error);
+            });
+        });
         
     } catch (error) {
         console.error('❌ Erro ao gerar PDF:', error);
         throw new Error(`Falha ao gerar certificado PDF: ${error.message}`);
-    } finally {
-        try {
-            if (page && !page.isClosed()) {
-                console.log('🔒 Fechando página...');
-                await page.close();
-            }
-        } catch (error) {
-            console.log('⚠️ Erro ao fechar página:', error.message);
-        }
-        
-        try {
-            if (browser) {
-                console.log('🔒 Fechando browser...');
-                await browser.close();
-            }
-        } catch (error) {
-            console.log('⚠️ Erro ao fechar browser:', error.message);
-        }
     }
 };
 
