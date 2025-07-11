@@ -41,6 +41,11 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         len: [0, 50]
       }
+    },
+    pdfUrl: {
+      type: DataTypes.TEXT,
+      field: 'pdf_url',
+      allowNull: true
     }
   }, {
     tableName: 'Certificate',
@@ -49,18 +54,18 @@ module.exports = (sequelize, DataTypes) => {
 
   // Associações
   Certificate.associate = function(models) {
-  Certificate.belongsTo(models.Course, {
-    foreignKey: 'courseId', // Nome do atributo
-    targetKey: 'id',        // Nome do atributo no modelo Course
-    as: 'course'
-  });
-  
-  Certificate.belongsTo(models.User, {
-    foreignKey: 'workerNumber',
-    targetKey: 'workerNumber',
-    as: 'user'
-  });
-};
+    Certificate.belongsTo(models.Course, {
+      foreignKey: 'courseId',
+      targetKey: 'id',
+      as: 'course'
+    });
+    
+    Certificate.belongsTo(models.User, {
+      foreignKey: 'workerNumber',
+      targetKey: 'workerNumber',
+      as: 'user'
+    });
+  };
 
   return Certificate;
 };
