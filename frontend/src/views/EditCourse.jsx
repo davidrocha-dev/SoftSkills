@@ -5,6 +5,7 @@ import { Button, Form, Container, Row, Col, Card, Accordion, Image, Table, Spinn
 import { ChevronUp, ChevronDown, Trash, Plus, Dash, PlusCircle } from 'react-bootstrap-icons';
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
+import Loading from '../components/Loading';
 
 
 // Imagem padrão do Cloudinary que não deve ser removida
@@ -440,7 +441,7 @@ export default function EditCourse() {
         }
     };
 
-    if (loading) return <div>Carregando...</div>;
+    if (loading) return <Loading />;
     if (error) return (
         <div className="alert alert-danger m-4" role="alert">
             <h4 className="alert-heading">Erro!</h4>

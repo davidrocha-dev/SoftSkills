@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import { useAuth } from '../context/AuthContext';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
+import Loading from './Loading';
 
 // Componente genérico de seta com cor azul personalizada
 const Arrow = ({ onClick, direction }) => {
@@ -90,7 +91,7 @@ const EnrolledCoursesCarousel = () => {
   };
 
   if (loading) {
-    return <div className="text-center my-5"><Spinner animation="border" /></div>;
+    return <Loading />;
   }
 
   if (courses.length === 0) {

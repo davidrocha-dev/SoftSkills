@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import '../assets/styles/login.css';
 import logo from '../assets/img/softinsa-logo.png';
 import { api } from '../services/authService';
+import Loading from '../components/Loading';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -33,6 +34,8 @@ const ForgotPassword = () => {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) return <Loading />;
 
   return (
     <>
