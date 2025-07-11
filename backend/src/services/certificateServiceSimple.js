@@ -218,7 +218,42 @@ const generateCertificatePDF = async (certificateData) => {
         // Em produção (Render.com), usar configuração específica
         if (isProduction) {
             console.log('🏭 Ambiente de produção detectado, usando configuração otimizada...');
-            // O Puppeteer vai baixar automaticamente o Chromium correto
+            
+            // Tentar encontrar o Chrome em diferentes locais
+            const possiblePaths = [
+                process.env.PUPPETEER_EXECUTABLE_PATH,
+                '/usr/bin/google-chrome-stable',
+                '/usr/bin/google-chrome',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
+                '/snap/bin/chromium'
+            ].filter(Boolean);
+            
+            // Verificar qual caminho existe
+            for (const chromePath of possiblePaths) {
+                try {
+                    if (fs.existsSync(chromePath)) {
+                        console.log(`✅ Chrome encontrado em: ${chromePath}`);
+                        launchOptions.executablePath = chromePath;
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`❌ Chrome não encontrado em: ${chromePath}`);
+                }
+            }
+            
+            // Configurações específicas para Render
+            launchOptions.userDataDir = '/tmp/puppeteer';
+            
+            // Garantir que o diretório temporário existe
+            const tempDir = '/tmp/puppeteer';
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, { recursive: true });
+            }
+            
+            if (!launchOptions.executablePath) {
+                console.log('⚠️ Chrome não encontrado, tentando sem executablePath...');
+            }
         }
 
         browser = await puppeteer.launch(launchOptions);
