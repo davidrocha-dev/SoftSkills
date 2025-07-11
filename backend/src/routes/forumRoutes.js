@@ -1,6 +1,7 @@
 const express = require('express');
 const { Topic, Comment, User, Reaction, Area, Category, Report } = require('../models');
 const router = express.Router();
+const { Op } = require('sequelize');
 
 // Endpoint real para buscar tópicos do fórum
 router.get('/topics', async (req, res) => {
@@ -36,11 +37,11 @@ router.get('/topics', async (req, res) => {
         }
       ]
     });
-    // Buscar todos os comentários principais (parentCommentId == null)
+    // Buscar todos os comentários principais (parentCommentId == null e status == true)
     let mainComments = [];
     topics.forEach(topic => {
       (topic.comments || []).forEach(comment => {
-        if (comment.parentCommentId == null) {
+        if (comment.parentCommentId == null && comment.status === true) {
           mainComments.push({ topic, comment });
         }
       });
@@ -208,6 +209,206 @@ router.get('/topics-list', async (req, res) => {
     res.json({ topics });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar tópicos', details: err.message });
+  }
+});
+
+// Endpoint para buscar comentários pendentes de moderação
+router.get('/pending-comments', async (req, res) => {
+  try {
+    const pendingComments = await Comment.findAll({
+      where: { 
+        status: false,
+        parentCommentId: null // Apenas comentários principais (sem pai)
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name', 'workerNumber']
+        },
+        {
+          model: Topic,
+          as: 'topic',
+          include: [
+            {
+              model: Area,
+              as: 'area',
+              include: [
+                {
+                  model: Category,
+                  as: 'category',
+                  attributes: ['description']
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      order: [['commentDate', 'ASC']]
+    });
+
+    const formattedComments = pendingComments.map(comment => ({
+      id: comment.id,
+      content: comment.content,
+      commentDate: comment.commentDate,
+      authorName: comment.user?.name || 'Desconhecido',
+      workerNumber: comment.user?.workerNumber || '',
+      topicTitle: comment.topic?.description || '',
+      category: comment.topic?.area?.category?.description || '',
+      area: comment.topic?.area?.description || '',
+      parentCommentId: comment.parentCommentId
+    }));
+
+    res.json({ 
+      success: true, 
+      pendingComments: formattedComments 
+    });
+  } catch (err) {
+    console.error('ERRO AO BUSCAR COMENTÁRIOS PENDENTES:', err);
+    res.status(500).json({ error: 'Erro ao buscar comentários pendentes', details: err.message });
+  }
+});
+
+// Endpoint para aprovar/rejeitar comentários
+router.put('/moderate-comment/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body; // 'approve' ou 'reject'
+    
+    if (!action || !['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'Ação inválida. Use "approve" ou "reject".' });
+    }
+
+    const comment = await Comment.findByPk(id);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comentário não encontrado.' });
+    }
+
+    if (action === 'approve') {
+      comment.status = true;
+      await comment.save();
+      res.json({ success: true, message: 'Comentário aprovado com sucesso.' });
+    } else {
+      // Para rejeitar, podemos eliminar o comentário ou manter status false
+      await comment.destroy();
+      res.json({ success: true, message: 'Comentário rejeitado e eliminado.' });
+    }
+  } catch (err) {
+    console.error('ERRO AO MODERAR COMENTÁRIO:', err);
+    res.status(500).json({ error: 'Erro ao moderar comentário', details: err.message });
+  }
+});
+
+// Endpoint para buscar denúncias pendentes
+router.get('/pending-reports', async (req, res) => {
+  try {
+    const pendingReports = await Report.findAll({
+      where: { status: false, commentId: { [Op.ne]: null } },
+      include: [
+        {
+          model: Comment,
+          as: 'Comment',
+          required: false,
+          include: [
+            {
+              model: User,
+              as: 'user', // minúsculo para autor do comentário
+              attributes: ['name', 'workerNumber']
+            },
+            {
+              model: Topic,
+              as: 'topic',
+              include: [
+                {
+                  model: Area,
+                  as: 'area',
+                  include: [
+                    {
+                      model: Category,
+                      as: 'category',
+                      attributes: ['description']
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: User,
+          as: 'User', // maiúsculo para utilizador do report
+          attributes: ['name', 'workerNumber']
+        }
+      ],
+      order: [['reportDate', 'ASC']]
+    });
+
+    const formattedReports = pendingReports.map(report => ({
+      id: report.id,
+      reason: report.reason,
+      reportDate: report.reportDate,
+      reporterName: report.User?.name || 'Desconhecido',
+      reporterWorkerNumber: report.User?.workerNumber || '',
+      commentId: report.commentId,
+      commentContent: report.Comment?.content || '(Comentário removido)',
+      commentAuthorName: report.Comment?.user?.name || '(Comentário removido)',
+      commentAuthorWorkerNumber: report.Comment?.user?.workerNumber || '',
+      topicTitle: report.Comment?.topic?.description || '(Comentário removido)',
+      category: report.Comment?.topic?.area?.category?.description || '',
+      area: report.Comment?.topic?.area?.description || ''
+    }));
+
+    res.json({ 
+      success: true, 
+      pendingReports: formattedReports 
+    });
+  } catch (err) {
+    console.error('ERRO AO BUSCAR DENÚNCIAS PENDENTES:', err);
+    res.status(500).json({ error: 'Erro ao buscar denúncias pendentes', details: err.message });
+  }
+});
+
+// Endpoint para resolver denúncias
+router.put('/resolve-report/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body; // 'dismiss' ou 'remove_comment'
+    
+    if (!action || !['dismiss', 'remove_comment'].includes(action)) {
+      return res.status(400).json({ error: 'Ação inválida. Use "dismiss" ou "remove_comment".' });
+    }
+
+    const report = await Report.findByPk(id, {
+      include: [
+        {
+          model: Comment,
+          as: 'Comment'
+        }
+      ]
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Denúncia não encontrada.' });
+    }
+
+    if (action === 'dismiss') {
+      // Marcar denúncia como resolvida (status = true)
+      report.status = true;
+      await report.save();
+      res.json({ success: true, message: 'Denúncia arquivada com sucesso.' });
+    } else {
+      // Eliminar o comentário denunciado
+      if (report.Comment) {
+        await report.Comment.destroy();
+      }
+      // Marcar denúncia como resolvida
+      report.status = true;
+      await report.save();
+      res.json({ success: true, message: 'Comentário removido e denúncia arquivada.' });
+    }
+  } catch (err) {
+    console.error('ERRO AO RESOLVER DENÚNCIA:', err);
+    res.status(500).json({ error: 'Erro ao resolver denúncia', details: err.message });
   }
 });
 

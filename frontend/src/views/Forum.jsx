@@ -8,7 +8,7 @@ import { BiLike, BiDislike } from 'react-icons/bi';
 import Select from 'react-select';
 
 const Forum = () => {
-  const { user } = useAuth();
+  const { user, selectedRole } = useAuth();
   const [topics, setTopics] = useState([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('Todos');
@@ -107,7 +107,15 @@ const Forum = () => {
     <>
       <Header />
       <Container className="py-4">
-        <h2 className="mb-4 fw-bold">Fórum</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="fw-bold mb-0">Fórum</h2>
+          {selectedRole === 'gestor' && (
+            <Link to="/forum-moderation" className="btn btn-warning">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              Moderação do Fórum
+            </Link>
+          )}
+        </div>
         <Form className="bg-light p-3 rounded mb-4 d-flex flex-wrap gap-2 align-items-end">
           <Form.Control
             type="text"
