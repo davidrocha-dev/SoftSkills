@@ -1,4 +1,3 @@
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -16,19 +15,8 @@ try {
             console.log('✅ Diretório Puppeteer criado:', puppeteerDir);
         }
         
-        // Instalar Chrome se necessário
-        console.log('📥 Verificando instalação do Chrome...');
-        try {
-            execSync('npx puppeteer browsers install chrome', { 
-                stdio: 'inherit',
-                cwd: process.cwd()
-            });
-            console.log('✅ Chrome instalado com sucesso');
-        } catch (error) {
-            console.log('⚠️ Erro ao instalar Chrome:', error.message);
-        }
-        
         // Configurar variáveis de ambiente
+        // O Puppeteer já baixa o Chromium automaticamente na primeira execução
         const puppeteerExecutablePath = path.join(process.cwd(), 'node_modules', 'puppeteer', '.local-chromium', 'linux-*', 'chrome-linux', 'chrome');
         
         console.log('🔧 Configurando caminho do executável:', puppeteerExecutablePath);
