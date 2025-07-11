@@ -110,32 +110,57 @@ exports.getProfileByWorkerNumber = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
+
     const { id } = req.params;
+    // Impedir autoeliminação
+    if (parseInt(id) === req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Não é possível eliminar o utilizador autenticado.'
+      });
+    }
+
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilizador não encontrado' });
     }
 
-    // conta associações pelos campos corretos
-    const [enrollCount, interestCount] = await Promise.all([
-      Enrollment.count({ where: { userId: id } }),
-      Interest.count({ where: { workerNumber: user.workerNumber } })
-    ]);
 
-    if (enrollCount > 0 || interestCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Não é possível eliminar utilizador com cursos ou interesses associados'
-      });
-    }
+    // Eliminar todas as inscrições associadas ao utilizador (não bloquear se existirem)
 
     // 1) Apagar inscrições associadas ao utilizador
     await Enrollment.destroy({ where: { userId: id } });
 
-   // 2) Apagar pedidos de suporte associados ao utilizador
+
+    // 2) Apagar pedidos de suporte associados ao utilizador
     await Request.destroy({ where: { workerNumber: user.workerNumber } });
 
-    // 3) Finalmente elimina o utilizador
+    // 3) Apagar interesses associados ao utilizador
+    await Interest.destroy({ where: { workerNumber: user.workerNumber } });
+
+    // 4) Apagar certificados associados ao utilizador
+    const { Certificate, Notification, Reaction, Comment, Report } = require('../models');
+    await Certificate.destroy({ where: { workerNumber: user.workerNumber } });
+
+    // 5) Apagar notificações associadas ao utilizador (workerNumber)
+    await Notification.destroy({ where: { workerNumber: user.workerNumber } });
+
+    // 6) Apagar reações associadas ao utilizador
+    await Reaction.destroy({ where: { userId: id } });
+
+    // 7) Apagar comentários associados ao utilizador
+    await Comment.destroy({ where: { userId: id } });
+
+    // 8) Apagar relatórios feitos pelo utilizador
+    await Report.destroy({ where: { userId: id } });
+
+    // 9) Limpar o campo formador nos cursos onde o utilizador era instrutor
+    await Course.update(
+      { instructor: '' },
+      { where: { instructor: user.name } }
+    );
+
+    // 9) Finalmente elimina o utilizador
     await user.destroy();
     return res.json({ success: true });
   } catch (error) {
