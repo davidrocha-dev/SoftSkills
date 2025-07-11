@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const gestorRoutes = require('./routes/gestorRoutes');
 const areaRoutes = require('./routes/areaRoutes');
@@ -15,6 +16,7 @@ const imageRoutes = require('./routes/imageRoutes');
 const forumRoutes = require ('./routes/forumRoutes')
 const uploadRoutes = require('./routes/uploadRoutes');
 const resourceTypeRoutes = require('./routes/resourceTypeRoutes');
+const certificateRoutes = require('./routes/certificateRoutes');
 const seed = require('./seed');
 const { sequelize } = require('./models');
 
@@ -50,6 +52,7 @@ app.use('/api/image', imageRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/resource-types', resourceTypeRoutes);
 app.use('/api/forum', forumRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 
 app.use((err, req, res, next) => {
