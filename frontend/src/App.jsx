@@ -23,6 +23,8 @@ import Course from './views/Course';
 //import Discussion from './components/Discussion';
 import EditCourse from './views/EditCourse';
 import CourseEnrollments from './views/CourseEnrollments';
+import CertificateManagement from './views/CertificateManagement';
+import CertificateList from './views/CertificateList';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles/main.css';
 import Forum from './views/Forum';
@@ -203,6 +205,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['gestor','formador']}>
                 <CourseEnrollments/>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/certificate-management/:courseId"
+            element={
+              <ProtectedRoute allowedRoles={['gestor','formador']}>
+                <CertificateManagement/>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/certificate-list/:courseId"
+            element={
+              <ProtectedRoute allowedRoles={['gestor','formador']}>
+                <CertificateList/>
               </ProtectedRoute>
             }
           />

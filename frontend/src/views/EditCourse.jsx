@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import { Button, Form, Container, Row, Col, Card, Accordion, Image, Table, Spinner, Alert } from 'react-bootstrap';
-import { ChevronUp, ChevronDown, Trash, Plus, Dash, PlusCircle } from 'react-bootstrap-icons';
+import { ChevronUp, ChevronDown, Trash, Plus, Dash, PlusCircle, Award } from 'react-bootstrap-icons';
 import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
 import Loading from '../components/Loading';
@@ -472,9 +472,18 @@ export default function EditCourse() {
                 <Col md={8} className="mx-auto">
                   <div className="d-flex justify-content-between align-items-center mb-3 w-100">
                     <h2 className="text-start mb-0">Editar Curso: {course.title}</h2>
-                    <Button variant="outline-primary" className="ms-3" onClick={() => navigate(`/cursos/${id}/inscricoes`)}>
-                      Ver Alunos
-                    </Button>
+                    <div className="d-flex gap-2">
+                      <Button variant="outline-primary" onClick={() => navigate(`/cursos/${id}/inscricoes`)}>
+                        Ver Alunos
+                      </Button>
+                      <Button 
+                        variant="outline-success" 
+                        onClick={() => navigate(`/certificate-management/${id}`)}
+                      >
+                        <Award size={16} className="me-1" />
+                        Emitir Certificados
+                      </Button>
+                    </div>
                   </div>
 
                         {/* Formulário do curso */}
