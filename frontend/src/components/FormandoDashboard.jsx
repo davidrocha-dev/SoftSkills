@@ -118,7 +118,7 @@ const FormandoDashboard = () => {
     (async () => {
       setLoadingEnrolled(true);
       try {
-        const res = await api.get(`/inscricoes/enrolled/${user.id}`, {
+        const res = await api.get(`/enrollments/enrolled/${user.id}`, {
           headers: { 'x-selected-role': selectedRole }
         });
         const ids = res.data.courseIds || [];

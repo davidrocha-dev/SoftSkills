@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +25,7 @@ import '../assets/styles/course.css';
 export default function Course() {
   const { id } = useParams();
   const { selectedRole, user } = useAuth();
+  const navigate = useNavigate();
 
   const [course, setCourse]                     = useState(null);
   const [totalEnrollments, setTotalEnrollments] = useState(0);
@@ -79,6 +80,21 @@ export default function Course() {
     const el = descRef.current;
     if (el) setShowToggle(el.scrollHeight > el.clientHeight);
   }, [course, showMore]);
+
+  // Adicionar variável para verificar se é o formador
+  const isInstructor = user?.workerNumber && course?.instructor && user.workerNumber === course.instructor;
+
+  useEffect(() => {
+    if (
+      course &&
+      course.visible === false &&
+      course.status === false &&
+      course.inscricoes === false &&
+      !isInstructor
+    ) {
+      navigate('/dashboard');
+    }
+  }, [course, isInstructor, navigate]);
 
   const handleEnroll = async () => {
     try {
@@ -162,8 +178,6 @@ const isFull = totalEnrollments >= vacancies;
 // A constante `disableEnroll` já considera ambas as condições.
 const disableEnroll = isEnrolled || (vacancies !== Infinity && totalEnrollments >= vacancies);
 
-// Adicionar variável para verificar se é o formador
-const isInstructor = user?.workerNumber && course?.instructor && user.workerNumber === course.instructor;
 
 console.log('user.workerNumber:', user?.workerNumber, 'course.instructor:', course?.instructor);
 
