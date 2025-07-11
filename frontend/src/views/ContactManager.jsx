@@ -5,6 +5,7 @@ import { FaPaperPlane,FaCheckCircle, FaEnvelope } from 'react-icons/fa';
 import '../assets/styles/login.css';
 import logo from '../assets/img/softinsa-logo.png';
 import { api } from '../services/authService';
+import Loading from '../components/Loading';
 
 const ContactManager = () => {
   const predefinedSubjects = [
@@ -127,6 +128,8 @@ const ContactManager = () => {
     setIsSubmitting(false);
   }
   };
+
+  if (isSubmitting) return <Loading />;
 
   return (
     <>

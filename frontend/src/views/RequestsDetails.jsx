@@ -16,6 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 import { FaArrowLeft } from 'react-icons/fa';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 
 
 const RequestDetailsPage = () => {
@@ -78,16 +79,7 @@ const RequestDetailsPage = () => {
     return 'secondary';
   };
 
-  if (loading) {
-    return (
-      <Container
-        className="d-flex justify-content-center align-items-center"
-        style={{ height: '80vh' }}
-      >
-        <Spinner animation="border" role="status" />
-      </Container>
-    );
-  }
+  if (loading) return <Loading />;
 
   const isResolved = request?.status === 'Resolvido';
   const leftColSize = isResolved ? 12 : 8;

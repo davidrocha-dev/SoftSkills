@@ -1,14 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload');
+const { uploadCourseResource } = require('../config/cloudinary');
 
-// Endpoint para upload de anexos de comentários
-router.post('/comment-attachment', upload.single('file'), async (req, res) => {
+// Middleware para upload de recursos
+const uploadResource = (req, res, next) => {
+  uploadCourseResource.single('file')(req, res, err => {
+    if (err) {
+      console.error('❌ [upload.resource] Erro no upload:', err.message);
+      return res.status(400).json({ success: false, error: err.message });
+    }
+    next();
+  });
+};
+
+// Upload de recursos de curso
+router.post('/resource', uploadResource, (req, res) => {
+  console.log('🔔 [uploadResource] req.file:', req.file);
   if (!req.file) {
-    return res.status(400).json({ success: false, message: 'Nenhum ficheiro enviado.' });
+    console.warn('⚠️ [uploadResource] Nenhum arquivo enviado');
+    return res.status(400).json({ success: false, error: 'Nenhum arquivo enviado' });
   }
-  // Retorna o caminho/URL do ficheiro
-  res.json({ success: true, file: { url: `/uploads/${req.file.filename}` } });
+
+  // path inclui a URL no Cloudinary
+  const fileUrl = req.file.path;
+  console.log('✅ [uploadResource] URL do arquivo:', fileUrl);
+  return res.status(200).json({ success: true, fileUrl });
 });
 
 module.exports = router; 

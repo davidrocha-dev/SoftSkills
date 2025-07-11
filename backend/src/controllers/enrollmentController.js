@@ -9,7 +9,9 @@ exports.listEnrollments = async (req, res) => {
         { model: User, as: 'user' }
       ]
     });
-    res.json(enrollments);
+    // Filtrar apenas inscrições com usuário associado
+    const filtered = enrollments.filter(e => e.user !== null);
+    res.json(filtered);
   } catch (error) {
     console.error('Erro ao buscar inscrições:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -85,5 +87,55 @@ exports.getEnrolledCoursesByUser = async (req, res) => {
       success: false,
       message: 'Erro interno ao buscar inscrições'
     });
+  }
+};
+
+exports.getEnrollmentsByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const enrollments = await Enrollment.findAll({
+      where: { courseId },
+      include: [
+        { model: User, as: 'user' }
+      ]
+    });
+    // Filtrar apenas inscrições com usuário associado
+    const filtered = enrollments.filter(e => e.user !== null);
+    res.json(filtered);
+  } catch (error) {
+    console.error('Erro ao buscar inscrições do curso:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
+
+exports.updateEnrollmentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const enrollment = await Enrollment.findByPk(id);
+    if (!enrollment) {
+      return res.status(404).json({ error: 'Inscrição não encontrada' });
+    }
+    enrollment.status = status;
+    await enrollment.save();
+    res.json(enrollment);
+  } catch (error) {
+    console.error('Erro ao atualizar inscrição:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
+
+exports.deleteEnrollment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const enrollment = await Enrollment.findByPk(id);
+    if (!enrollment) {
+      return res.status(404).json({ error: 'Inscrição não encontrada' });
+    }
+    await enrollment.destroy();
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao remover inscrição:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

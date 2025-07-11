@@ -295,7 +295,7 @@ exports.getEnrolledCourses = async (req, res) => {
     }
 
     const enrollments = await db.Enrollment.findAll({
-      where: { userId: userIdNumber, status: 'Ativo' },
+      where: { userId: userIdNumber, status: { [Op.in]: ['Ativo', 'Pendente'] } },
       include: [{
         model: db.Course,
         as: 'course',
@@ -307,7 +307,13 @@ exports.getEnrolledCourses = async (req, res) => {
       }]
     });
 
-    const courses = enrollments.map(e => e.course).filter(course => course !== null);
+    const courses = enrollments
+      .map(e => {
+        if (!e.course) return null;
+        return { ...e.course.toJSON(), enrollmentStatus: e.status };
+      })
+      .filter(Boolean);
+    console.log('Cursos inscritos retornados:', courses);
     res.json(courses);
   } catch (error) {
     console.error('Erro ao buscar cursos inscritos:', error);
@@ -393,8 +399,9 @@ exports.getCourseById = async (req, res) => {
       }
     });
 
-    // 3) Verifica se o usuário atual está inscrito
+    // 3) Verifica se o usuário atual está inscrito e pega o status
     let isEnrolled = false;
+    let enrollmentStatus = null;
     if (userId) {
       const enrollment = await db.Enrollment.findOne({
         where: { 
@@ -404,6 +411,7 @@ exports.getCourseById = async (req, res) => {
         }
       });
       isEnrolled = !!enrollment;
+      enrollmentStatus = enrollment ? enrollment.status : null;
     }
 
     // 4) Retorna o curso + totalEnrollments
@@ -411,7 +419,8 @@ exports.getCourseById = async (req, res) => {
       success: true,
       course,
       totalEnrollments,
-      isEnrolled
+      isEnrolled,
+      enrollmentStatus
     });
     
   } catch (error) {
@@ -457,45 +466,69 @@ exports.updateCourse = async (req, res) => {
 
     // Processar seções
     if (sections && Array.isArray(sections)) {
+      // Separar seções existentes e novas
+      const existingSections = [];
+      const newSections = [];
+      
       for (const sectionData of sections) {
-        let section;
-        const resources = sectionData.resources || [];
-
         if (sectionData.id) {
+          existingSections.push(sectionData);
           existingSectionIds.add(sectionData.id);
-          section = await Section.findByPk(sectionData.id, { transaction });
-          await section.update({
-            title: sectionData.title,
-            order: sectionData.order,
-            status: sectionData.status
-          }, { transaction });
         } else {
-          section = await Section.create({
-            title: sectionData.title,
-            order: sectionData.order,
-            status: sectionData.status,
-            courseId: id
-          }, { transaction });
-          console.log('Nova seção criada:', section.id, section.title);
-          existingSectionIds.add(section.id); // Corrige bug: garante que a nova secção não é removida
+          newSections.push(sectionData);
         }
+      }
+      
+      // Atualizar ordens das seções existentes de forma segura
+      if (existingSections.length > 0) {
+        await Section.updateOrdersSafely(id, existingSections);
+      }
+      
+      // Atualizar outros campos das seções existentes
+      for (const sectionData of existingSections) {
+        const section = await Section.findByPk(sectionData.id, { transaction });
+        await section.update({
+          title: sectionData.title,
+          status: sectionData.status
+        }, { transaction });
+      }
+      
+      // Criar novas seções
+      for (const sectionData of newSections) {
+        const section = await Section.create({
+          title: sectionData.title,
+          order: sectionData.order,
+          status: sectionData.status,
+          courseId: id
+        }, { transaction });
+        console.log('Nova seção criada:', section.id, section.title);
+        existingSectionIds.add(section.id);
+      }
+      
+      // Processar recursos para todas as seções
+      for (const sectionData of sections) {
+        const resources = sectionData.resources || [];
+        const section = sectionData.id 
+          ? await Section.findByPk(sectionData.id, { transaction })
+          : await Section.findOne({ 
+              where: { 
+                courseId: id, 
+                title: sectionData.title,
+                order: sectionData.order 
+              }, 
+              transaction 
+            });
 
         // Processar recursos da seção
         for (const resourceData of resources) {
-          if (resourceData.id) {
-            existingResourceIds.add(resourceData.id);
-            await Resource.update({
-              title: resourceData.title,
-              text: resourceData.text,
-              file: resourceData.file,
-              link: resourceData.link,
-              order: resourceData.order,
-              typeId: resourceData.typeId  // Campo correto do modelo
-            }, { 
-              where: { id: resourceData.id },
-              transaction 
-            });
-          } else {
+          console.log('Vai criar recurso:', {
+            title: resourceData.title,
+            file: resourceData.file,
+            sectionId: section.id,
+            typeId: resourceData.typeId
+          });
+          try {
+            console.log("XPTO", resourceData);
             const newResource = await Resource.create({
               title: resourceData.title,
               text: resourceData.text,
@@ -505,11 +538,15 @@ exports.updateCourse = async (req, res) => {
               typeId: resourceData.typeId,
               sectionId: section.id
             }, { transaction });
-            console.log('Novo recurso criado:', newResource.id, newResource.title);
+            existingResourceIds.add(newResource.id);
+            console.log('Recurso criado:', newResource.toJSON());
+          } catch (err) {
+            console.error('Erro ao criar recurso:', err);
           }
         }
       }
     }
+
 
     // Remover recursos/seções não enviados
     await Resource.destroy({
@@ -529,6 +566,7 @@ exports.updateCourse = async (req, res) => {
     });
 
     await transaction.commit();
+    console.log('Transação commitada com sucesso!');
 
     // Buscar curso atualizado
     const updatedCourse = await Course.findByPk(id, {
@@ -559,5 +597,25 @@ exports.updateCourse = async (req, res) => {
   }
 };
 
-
-
+// Criação direta de recurso
+exports.createResource = async (req, res) => {
+  try {
+    const { sectionId, typeId, title, file, text, link, order } = req.body;
+    if (!sectionId || !typeId || !title || !file) {
+      return res.status(400).json({ message: 'Campos obrigatórios em falta.' });
+    }
+    const resource = await Resource.create({
+      sectionId,
+      typeId,
+      title,
+      file,
+      text: text || '',
+      link: link || '',
+      order: order || 1
+    });
+    return res.status(201).json({ success: true, resource });
+  } catch (error) {
+    console.error('Erro ao criar recurso:', error);
+    return res.status(500).json({ message: 'Erro ao criar recurso', error: error.message });
+  }
+};

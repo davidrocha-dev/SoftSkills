@@ -4,6 +4,7 @@ import { Container, Card, Form, Button, Alert, Spinner, Row, Col } from 'react-b
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 import Header from '../components/Header';
+import Loading from '../components/Loading';
 
 const SettingsPage = () => {
     const { user, logout } = useAuth();
@@ -62,13 +63,7 @@ const SettingsPage = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
-                <Spinner animation="border" variant="primary" />
-            </Container>
-        );
-    }
+    if (loading) return <Loading />;
 
     return (
         <>

@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import UserList from '../components/UserListGestor';
 import { FaPlus, FaArrowLeft, FaIdCard, FaUser, FaEnvelope, FaUserTie } from 'react-icons/fa';
 import { Modal, Button } from 'react-bootstrap';
+import Loading from '../components/Loading';
 
 const CriarUtilizador = () => {
   const [form, setForm] = useState({
@@ -129,6 +130,8 @@ const CriarUtilizador = () => {
       setLoading(false);
     }
   };
+
+  if (loading) return <Loading />;
 
   return (
     <>
