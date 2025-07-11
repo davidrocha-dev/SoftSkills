@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import { api } from '../services/authService';
-import { Card, Button, Spinner } from 'react-bootstrap';
+import { Card, Button, Spinner, Badge } from 'react-bootstrap';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { useAuth } from '../context/AuthContext';
@@ -115,7 +115,9 @@ const EnrolledCoursesCarousel = () => {
                 />
               </div>
               <Card.Body className="d-flex flex-column flex-grow-1">
-                <Card.Title className="h5">{course.title}</Card.Title>
+                <Card.Title className="h5">
+                  {course.title}
+                </Card.Title>
                 <Card.Text
                   className="flex-grow-1 mb-3 text-wrap"
                   style={{
@@ -128,10 +130,18 @@ const EnrolledCoursesCarousel = () => {
                 >
                   {course.description}
                 </Card.Text>
-                <div className="d-flex justify-content-between align-items-center mt-auto">
+                <div className="d-flex justify-content-between align-items-center mb-2">
                   <Link to={`/cursos/${course.id}`}>
                     <Button variant="success">Ver Curso</Button>
                   </Link>
+                  <div>
+                    {course.enrollmentStatus === 'Ativo' && (
+                      <Badge bg="success">Inscrito</Badge>
+                    )}
+                    {course.enrollmentStatus === 'Pendente' && (
+                      <Badge bg="warning" text="dark">Pendente</Badge>
+                    )}
+                  </div>
                 </div>
               </Card.Body>
             </Card>

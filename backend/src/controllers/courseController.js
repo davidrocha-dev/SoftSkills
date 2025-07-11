@@ -295,7 +295,7 @@ exports.getEnrolledCourses = async (req, res) => {
     }
 
     const enrollments = await db.Enrollment.findAll({
-      where: { userId: userIdNumber, status: 'Ativo' },
+      where: { userId: userIdNumber, status: { [Op.in]: ['Ativo', 'Pendente'] } },
       include: [{
         model: db.Course,
         as: 'course',
@@ -307,7 +307,13 @@ exports.getEnrolledCourses = async (req, res) => {
       }]
     });
 
-    const courses = enrollments.map(e => e.course).filter(course => course !== null);
+    const courses = enrollments
+      .map(e => {
+        if (!e.course) return null;
+        return { ...e.course.toJSON(), enrollmentStatus: e.status };
+      })
+      .filter(Boolean);
+    console.log('Cursos inscritos retornados:', courses);
     res.json(courses);
   } catch (error) {
     console.error('Erro ao buscar cursos inscritos:', error);
