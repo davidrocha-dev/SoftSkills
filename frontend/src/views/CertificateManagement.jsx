@@ -237,7 +237,7 @@ export default function CertificateManagement() {
                                 required
                             />
                             <Form.Text className="text-muted">
-                                A nota deve estar entre 0 e 20
+                                A nota deve estar entre 0 e 20. A nota mínima para emissão de certificado é 9.5
                             </Form.Text>
                         </Form.Group>
 
@@ -251,7 +251,7 @@ export default function CertificateManagement() {
                     <Button 
                         variant="success" 
                         onClick={handleSubmitCertificate}
-                        disabled={issuingCertificate || !grade || grade < 0 || grade > 20}
+                        disabled={issuingCertificate || !grade || grade < 9.5 || grade > 20}
                     >
                         {issuingCertificate ? (
                             <>
