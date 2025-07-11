@@ -3,9 +3,6 @@ const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
 
-// Detectar se estamos em produção (Render.com)
-const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
-
 // Configuração do Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -178,7 +175,7 @@ const generateCertificateHTML = (certificateData) => {
     `;
 };
 
-// Função para gerar PDF usando Puppeteer com configuração específica para Render
+// Função para gerar PDF usando Puppeteer
 const generateCertificatePDF = async (certificateData) => {
     let browser = null;
     let page = null;
@@ -189,7 +186,6 @@ const generateCertificatePDF = async (certificateData) => {
         
         console.log('🚀 Iniciando Puppeteer...');
         
-        // Configuração do Puppeteer baseada no ambiente
         const launchOptions = {
             headless: 'new',
             args: [
@@ -214,47 +210,6 @@ const generateCertificatePDF = async (certificateData) => {
             ],
             timeout: 30000
         };
-
-        // Em produção (Render.com), usar configuração específica
-        if (isProduction) {
-            console.log('🏭 Ambiente de produção detectado, usando configuração otimizada...');
-            
-            // Tentar encontrar o Chrome em diferentes locais
-            const possiblePaths = [
-                process.env.PUPPETEER_EXECUTABLE_PATH,
-                '/usr/bin/google-chrome-stable',
-                '/usr/bin/google-chrome',
-                '/usr/bin/chromium-browser',
-                '/usr/bin/chromium',
-                '/snap/bin/chromium'
-            ].filter(Boolean);
-            
-            // Verificar qual caminho existe
-            for (const chromePath of possiblePaths) {
-                try {
-                    if (fs.existsSync(chromePath)) {
-                        console.log(`✅ Chrome encontrado em: ${chromePath}`);
-                        launchOptions.executablePath = chromePath;
-                        break;
-                    }
-                } catch (error) {
-                    console.log(`❌ Chrome não encontrado em: ${chromePath}`);
-                }
-            }
-            
-            // Configurações específicas para Render
-            launchOptions.userDataDir = '/tmp/puppeteer';
-            
-            // Garantir que o diretório temporário existe
-            const tempDir = '/tmp/puppeteer';
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, { recursive: true });
-            }
-            
-            if (!launchOptions.executablePath) {
-                console.log('⚠️ Chrome não encontrado, tentando sem executablePath...');
-            }
-        }
 
         browser = await puppeteer.launch(launchOptions);
         
