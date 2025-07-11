@@ -175,6 +175,14 @@ const UserListGestor = forwardRef((props, ref) => {
       setShowResultModal(true);
       loadUsers();
     } catch (err) {
+      if (err.response?.status === 403 && err.response?.data?.message) {
+        setShowEditModal(false);
+        setShowDeleteModal(false);
+        setResultMessage(err.response.data.message);
+        setIsSuccess(false);
+        setShowResultModal(true);
+        return;
+      }
       const msg = err.response?.data?.message || 'Falha ao eliminar utilizador';
       setResultMessage(msg);
       setIsSuccess(false);
