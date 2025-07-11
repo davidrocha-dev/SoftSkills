@@ -1,7 +1,10 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
+
+// Detectar se estamos em produção (Render.com)
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
 
 // Configuração do Cloudinary
 cloudinary.config({
@@ -185,7 +188,9 @@ const generateCertificatePDF = async (certificateData) => {
         const html = generateCertificateHTML(certificateData);
         
         console.log('🚀 Iniciando Puppeteer...');
-        browser = await puppeteer.launch({
+        
+        // Configuração do Puppeteer baseada no ambiente
+        const launchOptions = {
             headless: 'new',
             args: [
                 '--no-sandbox',
@@ -196,10 +201,27 @@ const generateCertificatePDF = async (certificateData) => {
                 '--no-zygote',
                 '--disable-gpu',
                 '--disable-web-security',
-                '--disable-features=VizDisplayCompositor'
+                '--disable-features=VizDisplayCompositor',
+                '--disable-extensions',
+                '--disable-plugins',
+                '--disable-images',
+                '--disable-javascript',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding',
+                '--disable-field-trial-config',
+                '--disable-ipc-flooding-protection'
             ],
             timeout: 30000
-        });
+        };
+
+        // Em produção (Render.com), usar o Chrome do sistema
+        if (isProduction) {
+            console.log('🏭 Ambiente de produção detectado, usando Chrome do sistema...');
+            launchOptions.executablePath = '/usr/bin/google-chrome-stable';
+        }
+
+        browser = await puppeteer.launch(launchOptions);
         
         console.log('📄 Criando nova página...');
         page = await browser.newPage();
