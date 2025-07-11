@@ -21,8 +21,9 @@ const generateCertificatePDF = async (certificateData) => {
         const html = generateCertificateHTML(certificateData);
         
         console.log('🚀 Iniciando Puppeteer...');
-        browser = await puppeteer.launch({
-            executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath(),
+        
+        // Configuração do Puppeteer baseada no ambiente
+        const puppeteerOptions = {
             headless: 'new',
             args: [
                 '--no-sandbox',
@@ -37,7 +38,20 @@ const generateCertificatePDF = async (certificateData) => {
                 '--disable-features=VizDisplayCompositor'
             ],
             timeout: 30000
-        });
+        };
+
+        // Usar caminho do Chrome se especificado no .env ou se estiver em produção
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            puppeteerOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+            console.log('🐳 Usando Chrome do .env:', process.env.PUPPETEER_EXECUTABLE_PATH);
+        } else if (process.env.NODE_ENV === 'production') {
+            puppeteerOptions.executablePath = '/usr/bin/chromium-browser-stable';
+            console.log('🐳 Usando Chrome padrão do Docker');
+        } else {
+            console.log('💻 Usando Chrome local do Puppeteer');
+        }
+
+        browser = await puppeteer.launch(puppeteerOptions);
         
         console.log('📄 Criando nova página...');
         page = await browser.newPage();

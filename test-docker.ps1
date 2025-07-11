@@ -17,9 +17,8 @@ if ($LASTEXITCODE -eq 0) {
     docker run -d `
         --name pint2-backend `
         -p 3000:3000 `
+        --env-file ./backend/env.example `
         -e NODE_ENV=production `
-        -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true `
-        -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser-stable `
         pint2-backend
     
     if ($LASTEXITCODE -eq 0) {
