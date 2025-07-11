@@ -49,6 +49,12 @@ module.exports = (sequelize, DataTypes) => {
         len: [1, 255]
       }
     },
+    status: {
+      type: DataTypes.BOOLEAN,
+      field: 'status',
+      allowNull: false,
+      defaultValue: false
+    },
   }, {
     tableName: 'Comment',
     timestamps: false
@@ -71,12 +77,14 @@ module.exports = (sequelize, DataTypes) => {
     Comment.belongsTo(models.Comment, {
       foreignKey: 'id_comentario_pai',
       targetKey: 'id',
-      as: 'parentComment'
+      as: 'parentComment',
+      onDelete: 'CASCADE'
     });
 
     Comment.hasMany(models.Comment, {
       foreignKey: 'id_comentario_pai',
-      as: 'replies'
+      as: 'replies',
+      onDelete: 'CASCADE'
     });
 
     Comment.hasMany(models.Reaction, {

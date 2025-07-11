@@ -180,12 +180,6 @@ const ForumTopic = () => {
                 <BiErrorCircle />
               </button>
             </div>
-            {replyingId === main.id && (
-              <form onSubmit={e => handleSubmitReply(e, main.id)} className="mt-2">
-                <textarea className="form-control mb-2" rows={2} value={replyContent} onChange={e => setReplyContent(e.target.value)} required />
-                <button type="submit" className="btn btn-sm btn-primary">Enviar resposta</button>
-              </form>
-            )}
           </Card.Body>
         </Card>
         <h6 className="mb-3">Respostas</h6>
