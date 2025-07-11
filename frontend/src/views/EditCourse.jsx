@@ -352,6 +352,8 @@ export default function EditCourse() {
       ) return;
       const newIndex = direction === 'up' ? resourceIndex - 1 : resourceIndex + 1;
       [resources[resourceIndex], resources[newIndex]] = [resources[newIndex], resources[resourceIndex]];
+      // Atualizar o campo order de todos os recursos
+      resources.forEach((res, idx) => { res.order = idx + 1; });
       updatedSections[sectionIndex].resources = resources;
       setSections(updatedSections);
     };
