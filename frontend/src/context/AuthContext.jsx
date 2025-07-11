@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       const tokenData = decodeToken(token);
       if (tokenData) {
-        setUser({ id: tokenData.id, email: tokenData.email, name: tokenData.name });
+        setUser({ id: tokenData.id, email: tokenData.email, name: tokenData.name, workerNumber: tokenData.workerNumber });
         const roles = tokenData.roles || [];
         setAvailableRoles(roles);
 
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     const tokenData = decodeToken(token);
-    setUser(userData);
+    setUser({ ...userData, workerNumber: tokenData.workerNumber });
     const roles = tokenData.roles || [];
     setAvailableRoles(roles);
     if (roles.length === 1) {

@@ -393,8 +393,9 @@ exports.getCourseById = async (req, res) => {
       }
     });
 
-    // 3) Verifica se o usuário atual está inscrito
+    // 3) Verifica se o usuário atual está inscrito e pega o status
     let isEnrolled = false;
+    let enrollmentStatus = null;
     if (userId) {
       const enrollment = await db.Enrollment.findOne({
         where: { 
@@ -404,6 +405,7 @@ exports.getCourseById = async (req, res) => {
         }
       });
       isEnrolled = !!enrollment;
+      enrollmentStatus = enrollment ? enrollment.status : null;
     }
 
     // 4) Retorna o curso + totalEnrollments
@@ -411,7 +413,8 @@ exports.getCourseById = async (req, res) => {
       success: true,
       course,
       totalEnrollments,
-      isEnrolled
+      isEnrolled,
+      enrollmentStatus
     });
     
   } catch (error) {
@@ -529,6 +532,7 @@ exports.updateCourse = async (req, res) => {
               typeId: resourceData.typeId,
               sectionId: section.id
             }, { transaction });
+            existingResourceIds.add(newResource.id);
             console.log('Recurso criado:', newResource.toJSON());
           } catch (err) {
             console.error('Erro ao criar recurso:', err);
@@ -536,6 +540,7 @@ exports.updateCourse = async (req, res) => {
         }
       }
     }
+
 
     // Remover recursos/seções não enviados
     await Resource.destroy({
@@ -608,6 +613,3 @@ exports.createResource = async (req, res) => {
     return res.status(500).json({ message: 'Erro ao criar recurso', error: error.message });
   }
 };
-
-
-

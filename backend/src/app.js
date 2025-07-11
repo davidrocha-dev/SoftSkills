@@ -40,7 +40,7 @@ app.use('/api/areas', areaRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/topicos', topicRoutes);
 app.use('/api/cursos', courseRoutes);
-app.use('/api/inscricoes', enrollmentRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/formador', formadorRoutes);
 app.use('/api/gestor', gestorRoutes);
 app.use('/api/users', userRoutes);
