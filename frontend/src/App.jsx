@@ -28,8 +28,8 @@ import CertificateList from './views/CertificateList';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/styles/main.css';
 import Forum from './views/Forum';
-import ForumTopic from './views/ForumTopic';
-import ForumModeration from './views/ForumModeration';
+import ForumTopic from './components/ForumTopic';
+import ForumModeration from './components/ForumModeration';
 
 
 // Componente para rotas públicas (redireciona se autenticado)
