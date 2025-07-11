@@ -120,10 +120,13 @@ PINT2/
 ├── backend/
 │   ├── Dockerfile              # Configuração Docker para backend
 │   ├── .dockerignore           # Ficheiros a ignorar no build
+│   ├── env.example             # Exemplo de variáveis de ambiente
+│   ├── .env                    # Variáveis de ambiente (criar a partir do exemplo)
 │   └── src/
 │       ├── app.js              # Servidor principal com health check
 │       └── services/
 │           └── certificateService.js  # Serviço de certificados com Puppeteer
 ├── render.yaml                 # Configuração automática do Render
+├── test-docker.ps1            # Script de teste para Windows
 └── DEPLOY_RENDER.md           # Este ficheiro
 ```
