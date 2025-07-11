@@ -25,10 +25,19 @@ O Puppeteer precisava do Chrome instalado para gerar PDFs. No ambiente do Render
    - Remove lógica de fallback complexa
    - Usa apenas o serviço simples
 
-3. **`package.json`** - Dependências otimizadas
+3. **`package.json`** - Dependências e scripts otimizados
+
    - Inclui `puppeteer` para download automático do Chromium
+   - Script `postinstall` para baixar Chrome automaticamente
+   - Script `start` que executa configuração antes do servidor
    - Mantém `puppeteer-core` para compatibilidade
    - Mantém `html-pdf-node` como alternativa
+
+4. **`setup-puppeteer.js`** - Script de configuração
+   - Configura o Puppeteer automaticamente no Render
+   - Cria diretórios necessários
+   - Define variáveis de ambiente
+   - Instala Chrome se necessário
 
 ## Configuração no Render Dashboard
 
@@ -50,11 +59,15 @@ CLOUDINARY_API_SECRET=seu_api_secret
 npm install
 ```
 
+**Nota**: O script `postinstall` irá automaticamente baixar o Chrome necessário.
+
 ### Start Command
 
 ```
 npm start
 ```
+
+**Nota**: O script `setup-puppeteer.js` será executado automaticamente antes do servidor iniciar.
 
 ## Como Funciona Agora
 
