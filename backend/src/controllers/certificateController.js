@@ -83,6 +83,14 @@ const issueCertificate = async (req, res) => {
             });
         }
 
+        // Validar nota mínima para aprovação
+        if (grade < 9.5) {
+            console.log('❌ Nota insuficiente para certificado:', grade);
+            return res.status(400).json({
+                message: 'A nota mínima para emissão de certificado é 9.5'
+            });
+        }
+
         console.log('🔍 Verificando inscrição do utilizador...');
 
         // Verificar se o usuário está inscrito no curso
