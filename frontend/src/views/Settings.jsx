@@ -69,6 +69,16 @@ const SettingsPage = () => {
         <>
             <Header />
             <Container className="my-5">
+                <div className="d-flex justify-content-end mb-3">
+                    <Button 
+                        variant="outline-primary" 
+                        onClick={() => window.location.href = `/id/${user.workerNumber}`}
+                        className="fw-medium"
+                    >
+                        <i className="bi bi-person-circle me-2"></i>
+                        Ver perfil
+                    </Button>
+                </div>
                 <h1 className="mb-4 fw-bold text-primary">Configurações da Conta</h1>
                 <Row className="g-4">
                     <Col lg={6}>
