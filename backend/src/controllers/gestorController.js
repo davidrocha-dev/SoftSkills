@@ -48,7 +48,8 @@ async function createUser(req, res) {
       email,
       password: hashedPassword,
       primaryRole,
-      status: true
+      status: true,
+      pfp: "https://res.cloudinary.com/dnhahua4h/image/upload/v1752293427/user-img_sljz04.png"
     });
     return res.status(201).json({ id: user.id, message: 'Usuário criado com sucesso' });
   } catch (err) {
