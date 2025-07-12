@@ -23,6 +23,7 @@ const UserDetails = () => {
   const [error, setError] = useState(null);
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
+  const [courseNameFilter, setCourseNameFilter] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -80,13 +81,14 @@ const UserDetails = () => {
   }
 
   const { user, enrollments = [] } = userData;
-  // Função para filtrar cursos pelo intervalo de datas
+  // Função para filtrar cursos pelo intervalo de datas e nome do curso
   const filteredEnrollments = enrollments.filter(e => {
     const start = e.startDate ? e.startDate.slice(0, 10) : '';
     const end = e.endDate ? e.endDate.slice(0, 10) : '';
     const afterStart = !startDateFilter || (start && start >= startDateFilter);
     const beforeEnd = !endDateFilter || (end && end <= endDateFilter);
-    return afterStart && beforeEnd;
+    const matchesCourseName = !courseNameFilter || (e.courseTitle && e.courseTitle.toLowerCase().includes(courseNameFilter.toLowerCase()));
+    return afterStart && beforeEnd && matchesCourseName;
   });
 
   return (
@@ -141,9 +143,9 @@ const UserDetails = () => {
           </Card.Body>
         </Card>
 
-        {/* Filtro por intervalo de datas */}
+        {/* Filtros */}
         <div className="mb-3">
-          <label className="form-label me-2"><strong>Filtrar por intervalo de datas:</strong></label>
+          <label className="form-label me-2"><strong>Filtrar por:</strong></label>
           <span className="me-2">Início</span>
           <input
             type="date"
@@ -158,8 +160,16 @@ const UserDetails = () => {
             value={endDateFilter}
             onChange={e => setEndDateFilter(e.target.value)}
           />
-          {(startDateFilter || endDateFilter) && (
-            <button className="btn btn-sm btn-outline-secondary ms-2" onClick={() => { setStartDateFilter(''); setEndDateFilter(''); }}>Limpar</button>
+          <span className="me-2">Curso</span>
+          <input
+            type="text"
+            className="form-control d-inline-block w-auto me-2"
+            placeholder="Nome do curso"
+            value={courseNameFilter}
+            onChange={e => setCourseNameFilter(e.target.value)}
+          />
+          {(startDateFilter || endDateFilter || courseNameFilter) && (
+            <button className="btn btn-sm btn-outline-secondary ms-2" onClick={() => { setStartDateFilter(''); setEndDateFilter(''); setCourseNameFilter(''); }}>Limpar</button>
           )}
         </div>
 
