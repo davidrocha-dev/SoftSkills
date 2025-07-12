@@ -1,11 +1,12 @@
 // src/views/Settings.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
+import { Container, Card, Form, Button, Alert, Spinner, Row, Col, Image } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
+import FileUpload from '../components/FileUpload';
 
 const SettingsPage = () => {
     const { user, logout } = useAuth();
@@ -15,10 +16,13 @@ const SettingsPage = () => {
     const [message, setMessage] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [pfpUploading, setPfpUploading] = useState(false);
+    const [currentPfp, setCurrentPfp] = useState('');
 
     useEffect(() => {
         if (user) {
             setForm({ name: user.name, email: user.email });
+            setCurrentPfp(user.pfp || '');
             setLoading(false);
         }
     }, [user]);
@@ -40,6 +44,30 @@ const SettingsPage = () => {
         } catch (err) {
             setError(err.response?.data?.error || 'Erro ao atualizar dados.');
         }
+    };
+
+    const handlePfpUpload = async (imageUrl) => {
+        setPfpUploading(true);
+        setError(null);
+        try {
+            const token = localStorage.getItem('token');
+            await api.put(
+                `/users/${user.id}`,
+                { pfp: imageUrl },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setCurrentPfp(imageUrl);
+            setMessage('Foto de perfil atualizada com sucesso!');
+        } catch (err) {
+            setError(err.response?.data?.error || 'Erro ao atualizar foto de perfil.');
+        } finally {
+            setPfpUploading(false);
+        }
+    };
+
+    const handlePfpUploadError = (error) => {
+        setError('Erro ao fazer upload da imagem: ' + error);
+        setPfpUploading(false);
     };
 
     const handleDeleteAccount = async () => {
@@ -121,6 +149,40 @@ const SettingsPage = () => {
                                             Alterar seu e-mail exigirá novo login
                                         </Form.Text>
                                     </Form.Group>
+                                    
+                                    <Form.Group className="mb-4" controlId="pfp">
+                                        <Form.Label className="fw-medium">Foto de Perfil</Form.Label>
+                                        <div className="d-flex align-items-center mb-3">
+                                            {currentPfp && (
+                                                <Image
+                                                    src={currentPfp}
+                                                    alt="Foto de perfil atual"
+                                                    className="rounded-circle me-3"
+                                                    style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                                />
+                                            )}
+                                            <div className="flex-grow-1">
+                                                <FileUpload
+                                                    onUploadSuccess={handlePfpUpload}
+                                                    onUploadError={handlePfpUploadError}
+                                                    uploadType="course-image"
+                                                    acceptedFiles="image/*"
+                                                    buttonText="Alterar Foto"
+                                                    buttonSize="sm"
+                                                />
+                                                {pfpUploading && (
+                                                    <div className="mt-2">
+                                                        <Spinner animation="border" size="sm" className="me-2" />
+                                                        <small className="text-muted">A fazer upload...</small>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <Form.Text className="text-muted">
+                                            Formatos aceites: JPG, PNG, GIF. Tamanho máximo: 5MB
+                                        </Form.Text>
+                                    </Form.Group>
+                                    
                                     <div className="d-flex justify-content-end mt-4">
                                         <Button 
                                             variant="primary" 
