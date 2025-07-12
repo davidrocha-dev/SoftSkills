@@ -9,5 +9,6 @@ router.get('/enrollments/:courseId', certificateController.getCourseEnrollments)
 router.post('/issue', certificateController.issueCertificate);
 router.get('/course/:courseId', certificateController.getCourseCertificates);
 router.get('/download/:certificateId', certificateController.downloadCertificate);
+router.delete('/revoke/:certificateId', certificateController.revokeCertificate);
 
 module.exports = router; 
