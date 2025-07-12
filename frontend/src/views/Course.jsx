@@ -181,8 +181,9 @@ return (
           <h4 className="mb-1">{course.title}</h4>
           {isInstructor ? (
             <Button
+              as={Link}
+              to={`/cursos/${id}/edit`}
               variant="primary"
-              onClick={() => window.location.href = `/cursos/${id}/edit`}
               style={{ cursor: 'pointer' }}
             >
               Editar Curso

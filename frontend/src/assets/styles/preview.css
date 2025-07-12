@@ -1,0 +1,483 @@
+/* Preview Page Styles */
+.preview-container {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+@media (max-width: 768px) {
+  .hero-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.hero-badges {
+  margin-bottom: 2rem;
+}
+
+.hero-badges .badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+}
+
+/* Hero Buttons */
+.hero-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.hero-btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+  transform: translateY(-2px);
+}
+
+
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+}
+
+.download-btn-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.android-icon {
+  font-size: 1.5rem;
+  color: #3DDC84;
+}
+
+.download-text {
+  text-align: left;
+  line-height: 1.2;
+}
+
+.download-text small {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.hero-image {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-main-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+  opacity: 0.9;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Feature Cards */
+.feature-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.feature-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  color: white;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  text-align: left;
+}
+
+.feature-list li {
+  padding: 0.25rem 0;
+  color: #6c757d;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.feature-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Tech Cards */
+.tech-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.tech-icon-wrapper {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.tech-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.tech-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  text-align: left;
+}
+
+.tech-list li {
+  padding: 0.25rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.tech-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #f5576c;
+  font-weight: bold;
+}
+
+/* Role Cards */
+.role-card {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.role-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.role-icon {
+  font-size: 1.8rem;
+  color: white;
+}
+
+.role-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  text-align: left;
+}
+
+.role-list li {
+  padding: 0.25rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.role-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain2" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain2)"/></svg>');
+  opacity: 0.3;
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.cta-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
+}
+
+.cta-button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+
+
+/* Footer */
+.footer {
+  background: #2c3e50;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .hero-main-image {
+    max-height: 300px;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  
+  .hero-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-main-image {
+    max-height: 250px;
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .hero-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .cta-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading animation for cards */
+.feature-card,
+.tech-card,
+.role-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animation for cards */
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.2s; }
+.feature-card:nth-child(3) { animation-delay: 0.3s; }
+.feature-card:nth-child(4) { animation-delay: 0.4s; }
+.feature-card:nth-child(5) { animation-delay: 0.5s; }
+.feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+.tech-card:nth-child(1) { animation-delay: 0.1s; }
+.tech-card:nth-child(2) { animation-delay: 0.2s; }
+.tech-card:nth-child(3) { animation-delay: 0.3s; }
+.tech-card:nth-child(4) { animation-delay: 0.4s; }
+.tech-card:nth-child(5) { animation-delay: 0.5s; }
+.tech-card:nth-child(6) { animation-delay: 0.6s; }
+
+.role-card:nth-child(1) { animation-delay: 0.1s; }
+.role-card:nth-child(2) { animation-delay: 0.2s; }
+.role-card:nth-child(3) { animation-delay: 0.3s; } 
+
+.hero-buttons-centered {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+.hero-buttons-centered .hero-btn {
+  min-width: 220px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.hero-buttons-centered .hero-btn:not(:last-child) {
+  margin-bottom: 1.2rem;
+}
+.hero-buttons-centered .btn-outline-secondary {
+  background: white;
+  color: #444;
+  border: 2px solid #bbb;
+}
+.hero-buttons-centered .btn-outline-secondary:hover {
+  background: #f8f9fa;
+  color: #222;
+  border-color: #3DDC84;
+}
+.hero-buttons-centered .fa-android {
+  color: #3DDC84;
+  font-size: 1.5rem;
+  margin-bottom: 0.1rem;
+}
+@media (max-width: 768px) {
+  .hero-buttons-centered .hero-btn {
+    min-width: 180px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+@media (max-width: 576px) {
+  .hero-buttons-centered {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .hero-buttons-centered .hero-btn {
+    min-width: 120px;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+} 
