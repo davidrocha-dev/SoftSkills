@@ -3,18 +3,18 @@ const { Category, Area, Topic } = db;
 
 exports.listCategories = async (req, res) => {
   try {
-    // Consulta otimizada com eager loading e tratamento de n+1
+    
     const categories = await db.Category.findAll({
       include: [{
         model: db.Area,
         as: 'areas',
         attributes: ['id', 'description'],
-        separate: true, // Executa query separada para áreas
+        separate: true,
         include: [{
           model: db.Topic,
           as: 'topics',
           attributes: ['id', 'description'],
-          separate: true // Query separada para tópicos
+          separate: true
         }]
       }],
       attributes: ['id', 'description'],
@@ -95,10 +95,8 @@ exports.checkFk = async (req, res) => {
       return res.json({ hasFk: false });
     }
 
-    // Verifica se há áreas associadas
     const hasAssociatedAreas = categoria.areas && categoria.areas.length > 0;
-    
-    // Se houver áreas, verifica se alguma delas tem tópicos
+
     let hasAssociatedTopics = false;
     if (hasAssociatedAreas) {
       const areaIds = categoria.areas.map(area => area.id);

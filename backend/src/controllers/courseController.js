@@ -1,17 +1,16 @@
-// Criação de seção individual para um curso
 exports.createSection = async (req, res) => {
   try {
-    const { id } = req.params; // id do curso
+    const { id } = req.params; 
     const { title, order, status } = req.body;
     if (!title || !order) {
       return res.status(400).json({ message: 'Título e ordem são obrigatórios' });
     }
-    // Garante que o curso existe
+
     const course = await Course.findByPk(id);
     if (!course) {
       return res.status(404).json({ message: 'Curso não encontrado' });
     }
-    // Cria a seção
+
     const section = await Section.create({
       title,
       order,
@@ -329,7 +328,6 @@ exports.getCourseById = async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
 
-    // 1) Busca o curso, incluindo seções e recursos
     const course = await db.Course.findByPk(id, {
       attributes: [
         'id', 'title', 'description', 'instructor', 'level',
@@ -391,7 +389,6 @@ exports.getCourseById = async (req, res) => {
       return res.status(404).json({ message: 'Curso não encontrado' });
     }
     
-    // 2) Conta quantas inscrições já existem neste curso
     const totalEnrollments = await db.Enrollment.count({
       where: { 
         courseId: id,
@@ -399,7 +396,6 @@ exports.getCourseById = async (req, res) => {
       }
     });
 
-    // 3) Verifica se o usuário atual está inscrito e pega o status
     let isEnrolled = false;
     let enrollmentStatus = null;
     if (userId) {
@@ -414,7 +410,6 @@ exports.getCourseById = async (req, res) => {
       enrollmentStatus = enrollment ? enrollment.status : null;
     }
 
-    // 4) Retorna o curso + totalEnrollments
     return res.json({
       success: true,
       course,
@@ -433,8 +428,6 @@ exports.getCourseById = async (req, res) => {
 };
 
 
-//TESTE
-
 exports.updateCourse = async (req, res) => {
   const { id } = req.params;
   const { title, description, topicId, level, startDate, endDate, vacancies, 
@@ -444,7 +437,6 @@ exports.updateCourse = async (req, res) => {
   try {
     transaction = await db.sequelize.transaction();
 
-    // Atualizar curso
     const [updated] = await Course.update({
       title, description, topicId, level, startDate, endDate, vacancies,
       instructor, status, visible, hours, image
@@ -455,13 +447,11 @@ exports.updateCourse = async (req, res) => {
       return res.status(404).json({ message: 'Curso não encontrado' });
     }
 
-    // IDs existentes para controle de deleção
     const existingSectionIds = new Set();
     const existingResourceIds = new Set();
 
-    // Processar seções
     if (sections && Array.isArray(sections) && sections.length > 0) {
-      // Separar seções existentes e novas
+
       const existingSections = [];
       const newSections = [];
       
@@ -474,12 +464,10 @@ exports.updateCourse = async (req, res) => {
         }
       }
       
-      // Atualizar ordens das seções existentes de forma segura
       if (existingSections.length > 0) {
         await Section.updateOrdersSafely(id, existingSections);
       }
       
-      // Atualizar outros campos das seções existentes
       for (const sectionData of existingSections) {
         const section = await Section.findByPk(sectionData.id, { transaction });
         await section.update({
@@ -488,7 +476,6 @@ exports.updateCourse = async (req, res) => {
         }, { transaction });
       }
       
-      // Criar novas seções
       for (const sectionData of newSections) {
         const section = await Section.create({
           title: sectionData.title,
@@ -499,7 +486,6 @@ exports.updateCourse = async (req, res) => {
         existingSectionIds.add(section.id);
       }
       
-      // Processar recursos para todas as seções
       for (const sectionData of sections) {
         const resources = sectionData.resources || [];
         const section = sectionData.id 
@@ -513,7 +499,6 @@ exports.updateCourse = async (req, res) => {
               transaction 
             });
 
-        // Processar recursos da seção
         for (const resourceData of resources) {
           try {
             const newResource = await Resource.create({
@@ -532,7 +517,6 @@ exports.updateCourse = async (req, res) => {
         }
       }
 
-      // Remover recursos/seções não enviados
       await Resource.destroy({
         where: {
           sectionId: Array.from(existingSectionIds),
@@ -552,7 +536,6 @@ exports.updateCourse = async (req, res) => {
 
     await transaction.commit();
 
-    // Buscar curso atualizado
     const updatedCourse = await Course.findByPk(id, {
       include: [{
         model: Section,
@@ -580,7 +563,6 @@ exports.updateCourse = async (req, res) => {
   }
 };
 
-// Criação direta de recurso
 exports.createResource = async (req, res) => {
   try {
     const { sectionId, typeId, title, file, text, link, order } = req.body;
