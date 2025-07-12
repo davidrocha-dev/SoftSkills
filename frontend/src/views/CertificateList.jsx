@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
-import { Button, Container, Row, Col, Card, Table, Alert, Spinner, Badge } from 'react-bootstrap';
-import { ArrowLeft, Download, Award, FileEarmarkPdf } from 'react-bootstrap-icons';
+import { Button, Container, Row, Col, Card, Table, Alert, Spinner, Badge, Modal } from 'react-bootstrap';
+import { ArrowLeft, Download, Award, FileEarmarkPdf, Trash } from 'react-bootstrap-icons';
 import Header from '../components/Header';
 
 export default function CertificateList() {
@@ -12,6 +12,9 @@ export default function CertificateList() {
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showRevokeModal, setShowRevokeModal] = useState(false);
+    const [certificateToRevoke, setCertificateToRevoke] = useState(null);
+    const [revoking, setRevoking] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,6 +48,34 @@ export default function CertificateList() {
             window.open(certificate.pdfUrl, '_blank');
         } else {
             setError('PDF do certificado não está disponível');
+        }
+    };
+
+    const handleRevokeCertificate = (certificate) => {
+        setCertificateToRevoke(certificate);
+        setShowRevokeModal(true);
+    };
+
+    const confirmRevokeCertificate = async () => {
+        if (!certificateToRevoke) return;
+
+        try {
+            setRevoking(true);
+            await api.delete(`/certificates/revoke/${certificateToRevoke.id}`);
+            
+            // Atualizar a lista de certificados
+            setCertificates(prevCertificates => 
+                prevCertificates.filter(cert => cert.id !== certificateToRevoke.id)
+            );
+            
+            setShowRevokeModal(false);
+            setCertificateToRevoke(null);
+            setError('');
+        } catch (err) {
+            console.error('Erro ao revogar certificado:', err);
+            setError('Erro ao revogar certificado. Tente novamente.');
+        } finally {
+            setRevoking(false);
         }
     };
 
@@ -158,15 +189,25 @@ export default function CertificateList() {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <Button
-                                                            variant="outline-primary"
-                                                            size="sm"
-                                                            onClick={() => handleDownloadCertificate(certificate)}
-                                                            disabled={!certificate.pdfUrl}
-                                                        >
-                                                            <Download size={16} className="me-1" />
-                                                            Baixar PDF
-                                                        </Button>
+                                                        <div className="d-flex gap-2">
+                                                            <Button
+                                                                variant="outline-primary"
+                                                                size="sm"
+                                                                onClick={() => handleDownloadCertificate(certificate)}
+                                                                disabled={!certificate.pdfUrl}
+                                                                title="Baixar PDF"
+                                                            >
+                                                                <Download size={16} />
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline-danger"
+                                                                size="sm"
+                                                                onClick={() => handleRevokeCertificate(certificate)}
+                                                                title="Revogar Certificado"
+                                                            >
+                                                                <Trash size={16} />
+                                                            </Button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -178,6 +219,42 @@ export default function CertificateList() {
                     </Col>
                 </Row>
             </Container>
+
+            <Modal show={showRevokeModal} onHide={() => setShowRevokeModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirmar Revogação</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {certificateToRevoke && (
+                        <div>
+                            <p>
+                                Tem a certeza que deseja revogar o certificado de{' '}
+                                <strong>{certificateToRevoke.user.name}</strong>?
+                            </p>
+                            <div className="alert alert-warning">
+                                <strong>Atenção:</strong> Esta ação irá:
+                                <ul className="mb-0 mt-2">
+                                    <li>Eliminar o certificado da base de dados</li>
+                                    <li>Eliminar o PDF do servidor de hosting</li>
+                                    <li>Esta ação não pode ser desfeita</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowRevokeModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        variant="danger" 
+                        onClick={confirmRevokeCertificate}
+                        disabled={revoking}
+                    >
+                        {revoking ? 'A revogar...' : 'Confirmar Revogação'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 } 

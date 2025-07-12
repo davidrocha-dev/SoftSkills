@@ -1,5 +1,12 @@
 const { Certificate, User, Course, Enrollment } = require('../models');
 const { generateAndUploadCertificate } = require('../services/certificateService');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const getCourseEnrollments = async (req, res) => {
     try {
@@ -239,9 +246,88 @@ const downloadCertificate = async (req, res) => {
     }
 };
 
+const revokeCertificate = async (req, res) => {
+    try {
+        const { certificateId } = req.params;
+        
+        console.log(`[RevokeCertificate] Iniciando revogação do certificado ID: ${certificateId}`);
+        
+        const certificate = await Certificate.findByPk(certificateId, {
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name', 'email', 'workerNumber']
+                },
+                {
+                    model: Course,
+                    as: 'course',
+                    attributes: ['id', 'title', 'description']
+                }
+            ]
+        });
+
+        if (!certificate) {
+            console.log(`[RevokeCertificate] Certificado não encontrado: ${certificateId}`);
+            return res.status(404).json({ 
+                success: false,
+                message: 'Certificado não encontrado' 
+            });
+        }
+
+        console.log(`[RevokeCertificate] Certificado encontrado para: ${certificate.user.name}`);
+
+        if (certificate.pdfUrl) {
+            try {
+                console.log(`[RevokeCertificate] Eliminando PDF do Cloudinary: ${certificate.pdfUrl}`);
+                
+                const urlParts = certificate.pdfUrl.split('/');
+                const filenameWithExtension = urlParts[urlParts.length - 1];
+                const publicId = `certificates/certificate_${certificateId}`;
+                
+                console.log(`[RevokeCertificate] Public ID para eliminar: ${publicId}`);
+                
+                const result = await cloudinary.uploader.destroy(publicId, {
+                    resource_type: 'raw'
+                });
+                
+                console.log(`[RevokeCertificate] Resultado da eliminação do Cloudinary:`, result);
+                
+                if (result.result === 'ok' || result.result === 'not found') {
+                    console.log(`[RevokeCertificate] PDF eliminado com sucesso do Cloudinary`);
+                } else {
+                    console.warn(`[RevokeCertificate] Resultado inesperado da eliminação: ${result.result}`);
+                }
+                
+                            } catch (cloudinaryError) {
+                    console.error(`[RevokeCertificate] Erro ao eliminar PDF do Cloudinary:`, cloudinaryError);
+                }
+        }
+
+        await certificate.destroy();
+        
+        console.log(`[RevokeCertificate] Certificado eliminado da base de dados: ${certificateId}`);
+
+        res.json({
+            success: true,
+            message: 'Certificado revogado com sucesso',
+            certificateId: certificateId
+        });
+
+    } catch (error) {
+        console.error('[RevokeCertificate] Erro ao revogar certificado:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Erro interno do servidor',
+            details: error.message
+        });
+    }
+};
+
 module.exports = {
     getCourseEnrollments,
     issueCertificate,
     getCourseCertificates,
-    downloadCertificate
+    downloadCertificate,
+    revokeCertificate
 }; 
