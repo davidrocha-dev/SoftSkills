@@ -203,7 +203,8 @@ exports.createUser = async (req, res) => {
       forcePasswordChange: true,
       isVerified: false,
       status: true,
-      createdAt: new Date()
+      createdAt: new Date(),
+      pfp: "https://res.cloudinary.com/dnhahua4h/image/upload/v1752293427/user-img_sljz04.png"
     });
 
     // Gerar token first login
