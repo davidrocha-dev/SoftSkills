@@ -1,4 +1,3 @@
-// models/Comment.js
 module.exports = (sequelize, DataTypes) => {
   const Comment = sequelize.define('Comment', {
     id: {
@@ -65,7 +64,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações
   Comment.associate = function(models) {
     Comment.belongsTo(models.Topic, {
       foreignKey: 'id_topico',

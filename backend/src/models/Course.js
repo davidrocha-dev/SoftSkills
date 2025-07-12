@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       field: 'tipo_curso',
       allowNull: false,
-      defaultValue: false // false para assíncrono, true para síncrono
+      defaultValue: false
     },
     description: {
       type: DataTypes.TEXT,
@@ -115,7 +115,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações atualizadas
   Course.associate = function(models) {
   Course.belongsTo(models.Topic, { 
     foreignKey: 'topicId', 
@@ -133,14 +132,12 @@ module.exports = (sequelize, DataTypes) => {
   });
 };
 
-  // Hooks
   Course.beforeValidate((course, options) => {
     if (course.startDate && course.endDate && course.startDate > course.endDate) {
       throw new Error('A data de início não pode ser posterior à data de término');
     }
   });
 
-  // Métodos de instância
   Course.prototype.getCourseTypeName = function() {
     return this.courseType ? 'Síncrono' : 'Assíncrono';
   };

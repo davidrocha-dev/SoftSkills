@@ -1,4 +1,3 @@
-// controllers/enrollmentController.js
 const { Enrollment, Course, User } = require('../models');
 const emailService = require('../services/emailServices');
 
@@ -10,7 +9,7 @@ exports.listEnrollments = async (req, res) => {
         { model: User, as: 'user' }
       ]
     });
-    // Filtrar apenas inscrições com usuário associado
+
     const filtered = enrollments.filter(e => e.user !== null);
     res.json(filtered);
   } catch (error) {
@@ -24,12 +23,10 @@ exports.createEnrollment = async (req, res) => {
   console.log('Recebendo dados para inscrição:', { courseId, userId });
 
   try {
-    // Verificar se os campos obrigatórios estão presentes
     if (!courseId || !userId) {
       return res.status(400).json({ error: 'Campos courseId e userId são obrigatórios' });
     }
 
-    // Verificar se já existe inscrição para este user + curso
     const existing = await Enrollment.findOne({
       where: { courseId, userId }
     });
@@ -37,19 +34,16 @@ exports.createEnrollment = async (req, res) => {
       return res.status(400).json({ error: 'Utilizador já inscrito neste curso' });
     }
 
-    // Verificar se o curso existe
     const course = await Course.findByPk(courseId);
     if (!course) {
       return res.status(404).json({ error: 'Curso não encontrado' });
     }
 
-    // Verificar se o usuário existe
     const user = await User.findByPk(userId);
     if (!user) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({ error: 'Utilizador não encontrado' });
     }
 
-    // Criar inscrição
     const newEnrollment = await Enrollment.create({
       courseId,
       userId,
@@ -60,7 +54,7 @@ exports.createEnrollment = async (req, res) => {
     return res.status(201).json(newEnrollment);
 
   } catch (error) {
-    console.error('❌ [createEnrollment] Erro ao criar inscrição:', error);
+    console.error('[createEnrollment] Erro ao criar inscrição:', error);
     return res.status(500).json({ error: 'Erro interno do servidor', details: error.message });
   }
 };
@@ -70,7 +64,6 @@ exports.getEnrolledCoursesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Busca apenas os IDs dos cursos em que este user está inscrito
     const enrollments = await Enrollment.findAll({
       where: { userId },
       attributes: ['courseId']
@@ -100,7 +93,7 @@ exports.getEnrollmentsByCourse = async (req, res) => {
         { model: User, as: 'user' }
       ]
     });
-    // Filtrar apenas inscrições com usuário associado
+
     const filtered = enrollments.filter(e => e.user !== null);
     res.json(filtered);
   } catch (error) {
@@ -121,9 +114,8 @@ exports.updateEnrollmentStatus = async (req, res) => {
     enrollment.status = status;
     await enrollment.save();
 
-    // Se mudou para Ativo, enviar email
+
     if (prevStatus !== 'Ativo' && status === 'Ativo') {
-      // Buscar dados do utilizador e curso
       const user = await User.findByPk(enrollment.userId);
       const course = await Course.findByPk(enrollment.courseId);
       if (user && course) {

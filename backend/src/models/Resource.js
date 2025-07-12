@@ -1,4 +1,3 @@
-// models/Resource.js
 module.exports = (sequelize, DataTypes) => {
   const Resource = sequelize.define('Resource', {
     id: {
@@ -70,7 +69,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações
   Resource.associate = models => {
     Resource.belongsTo(models.Section, {
       foreignKey: 'sectionId',
@@ -78,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     Resource.belongsTo(models.ResourceType, {
       foreignKey: 'typeId',
-      as: 'ResourceType'  // Associando com ResourceType, não Course
+      as: 'ResourceType'
     });
   };
 

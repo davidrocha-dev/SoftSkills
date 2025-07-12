@@ -10,8 +10,8 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from './Navbar';
 
 
-const Header = () => {
-  const { selectedRole, user } = useAuth();
+const Header = () => { 
+  const { selectedRole } = useAuth();
 
   const isResetPage = location.pathname.startsWith('/reset-password');
   const isSettingsPage = location.pathname.startsWith('/settings');

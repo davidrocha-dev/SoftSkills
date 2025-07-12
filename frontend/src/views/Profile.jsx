@@ -1,4 +1,3 @@
-// src/views/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -25,7 +24,7 @@ export default function Profile() {
     api.get(`/users/id/${workerNumber}`, { headers })
     .then(res => {
       const json = res.data;
-      console.log("🔎 Dados recebidos do backend:", json); // <-- adiciona este log
+      console.log("Dados recebidos do backend:", json);
       if (json.success) {
         setData({ user: json.user, courses: json.courses, interests: json.interests, certificates: json.certificates });
       } else {
@@ -56,14 +55,12 @@ export default function Profile() {
   const { user, courses, certificates = [] } = data;
   const avatarSrc = user.pfp ? user.pfp : defaultAvatar;
 
-  // Filtrar cursos apenas com inscrição ativa
   const activeCourses = Array.isArray(courses) ? courses.filter(c => c.status === 'Ativo' || c.status === 'ativo') : [];
 
   return (
     <>
       <Header />
       <div className="container mt-4">
-        {/* Top bar: Back to Dashboard and Logout aligned */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <Link to="/dashboard" className="btn btn-outline-secondary">
             &larr; Voltar ao Dashboard
@@ -72,8 +69,7 @@ export default function Profile() {
             Sair
           </button>
         </div>
-
-        {/* User Info */}
+    
         <div className="d-flex align-items-center mb-4">
           <img
             src={avatarSrc}
@@ -95,7 +91,6 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Cursos Inscritos */}
         <div className="mb-4">
           <h4>Cursos Inscritos</h4>
           {activeCourses.length === 0 ? (

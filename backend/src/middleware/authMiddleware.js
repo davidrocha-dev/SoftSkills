@@ -16,11 +16,9 @@ const authorize = (allowedRoles = []) => {
         return res.status(401).json({ message: 'Token inválido ou expirado' });
       }
 
-      // MELHORIA: Determinar role automaticamente se não fornecido
       let selectedRole = req.headers['x-selected-role'];
       
       if (!selectedRole) {
-        // Determinar automaticamente baseado na hierarquia
         if (decoded.roles.includes('gestor')) {
           selectedRole = 'gestor';
         } else if (decoded.roles.includes('formador')) {
@@ -32,12 +30,10 @@ const authorize = (allowedRoles = []) => {
         console.log(`Role determinado automaticamente: ${selectedRole}`);
       }
 
-      // Validar se o usuário possui esse role
       if (!decoded.roles.includes(selectedRole)) {
-        return res.status(403).json({ message: 'Função selecionada inválida para este usuário' });
+        return res.status(403).json({ message: 'Função selecionada inválida para este utilizador' });
       }
 
-      // Validar se o role tem permissão para esta rota
       if (allowedRoles.length > 0 && !allowedRoles.includes(selectedRole)) {
         return res.status(403).json({ message: 'Acesso negado para esta função' });
       }

@@ -5,8 +5,8 @@ import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { api } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import { Modal, Button } from 'react-bootstrap';
-import { Typeahead } from 'react-bootstrap-typeahead'; // Adicionado
-import 'react-bootstrap-typeahead/css/Typeahead.css'; // Adicionado
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 const ACTListGestor = () => {
   const { selectedRole } = useAuth();
@@ -30,7 +30,6 @@ const ACTListGestor = () => {
   const [categories, setCategories] = useState([]);
   const [areas, setAreas] = useState([]);
 
-  // Estados para os modais de resultado e confirmação
   const [showResultModal, setShowResultModal] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -169,7 +168,6 @@ const ACTListGestor = () => {
     }
   };
 
-  // Função para mostrar resultados
   const showResult = (message, success) => {
     setResultMessage(message);
     setIsSuccess(success);
@@ -177,13 +175,11 @@ const ACTListGestor = () => {
     setTimeout(() => setShowResultModal(false), 3000);
   };
 
-  // Função para confirmar exclusão
   const confirmDelete = (item) => {
     setItemToDelete(item);
     setShowDeleteModal(true);
   };
 
-  // Função para efetuar a exclusão
   const handleDelete = async (id) => {
     try {
       const headers = selectedRole ? { 'x-selected-role': selectedRole } : {};
@@ -201,14 +197,12 @@ const ACTListGestor = () => {
         deleteUrl = `/topicos/${id}`; 
       }
 
-      // Verificar FK
       const fkResponse = await api.get(checkFkUrl, { headers });
       if (fkResponse.data.hasFk === true) {
         showResult('Não é possível excluir este item porque ele está associado a outras entidades.', false);
         return;
       }
 
-      // Excluir item
       await api.delete(deleteUrl, { headers });
       fetchItems();
       showResult(`${view.charAt(0).toUpperCase() + view.slice(1)} excluído com sucesso!`, true);
@@ -287,8 +281,7 @@ const ACTListGestor = () => {
           <div className="card-header bg-white border-0 py-3">
             <div className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0 fw-semibold text-muted">
-                {view === 'categorias' ? 'Categorias Registadas' : 
-                 view === 'areas' ? 'Áreas Registadas' : 'Tópicos Registados'}
+                {view === 'categorias' ? 'Categorias Registadas' : view === 'areas' ? 'Áreas Registadas' : 'Tópicos Registados'}
               </h5>
               
               <button 
@@ -375,7 +368,7 @@ const ACTListGestor = () => {
           </div>
         </div>
 
-        {/* Modal de Edição/Criação */}
+
         {showModal && (
           <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -411,7 +404,6 @@ const ACTListGestor = () => {
                     {view === 'areas' && (
                       <div className="mb-3">
                         <label className="form-label fw-medium">Categoria</label>
-                        {/* Substituído por Typeahead */}
                         <Typeahead
                           id="category-typeahead"
                           labelKey="description"
@@ -429,7 +421,6 @@ const ACTListGestor = () => {
                     {view === 'topicos' && (
                       <div className="mb-3">
                         <label className="form-label fw-medium">Área</label>
-                        {/* Substituído por Typeahead */}
                         <Typeahead
                           id="area-typeahead"
                           labelKey="description"
@@ -466,7 +457,6 @@ const ACTListGestor = () => {
           </div>
         )}
 
-        {/* Modal de Resultado */}
         <Modal 
           show={showResultModal} 
           onHide={() => setShowResultModal(false)}
@@ -487,8 +477,6 @@ const ACTListGestor = () => {
             <p>{resultMessage}</p>
           </Modal.Body>
         </Modal>
-
-        {/* Modal de Confirmação de Exclusão */}
         <Modal 
           show={showDeleteModal} 
           onHide={() => setShowDeleteModal(false)} 

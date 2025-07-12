@@ -22,7 +22,6 @@ export default function CertificateManagement() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Buscar inscrições e dados do curso em paralelo
                 const [enrollmentsResponse, courseResponse] = await Promise.all([
                     api.get(`/certificates/enrollments/${courseId}`),
                     api.get(`/cursos/${courseId}`)
@@ -72,10 +71,8 @@ export default function CertificateManagement() {
             setSuccessMessage(`Certificado emitido com sucesso! ${response.data.pdfUrl ? 'PDF disponível para download.' : ''}`);
             setShowModal(false);
             
-            // Atualizar a lista de inscrições removendo o que acabou de receber certificado
             setEnrollments(prev => prev.filter(e => e.user.workerNumber !== selectedEnrollment.user.workerNumber));
             
-            // Limpar mensagem de sucesso após 3 segundos
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
             if (err.response?.status === 409) {
@@ -205,8 +202,7 @@ export default function CertificateManagement() {
                     </Col>
                 </Row>
             </Container>
-
-            {/* Modal para emitir certificado */}
+            
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>

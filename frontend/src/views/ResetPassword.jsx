@@ -1,6 +1,5 @@
-// src/views/ResetPassword.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
@@ -20,7 +19,6 @@ const ResetPasswordPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading]   = useState(true);
 
-  // Regex para validar pelo menos um número e uma letra maiúscula
   const passwordPattern = /^(?=.*[A-Z])(?=.*\d).+$/;
 
   useEffect(() => {
@@ -35,17 +33,14 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    // Verifica se as passwords coincidem
     if (password !== confirm) {
       setError('As passwords não coincidem.');
       return;
     }
-    // Verifica comprimento mínimo
     if (password.length < 8) {
       setError('A password deve ter pelo menos 8 caracteres.');
       return;
     }
-    // Verifica presença de número e letra maiúscula
     if (!passwordPattern.test(password)) {
       setError('A password deve conter pelo menos um número e uma letra maiúscula.');
       return;

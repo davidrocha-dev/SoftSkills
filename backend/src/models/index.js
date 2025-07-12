@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 const sequelize = require('../config/database');
 
-// Importar modelos
 const User = require('./User')(sequelize, require('sequelize').DataTypes);
 const Category = require('./Category')(sequelize, require('sequelize').DataTypes);
 const Area = require('./Area')(sequelize, require('sequelize').DataTypes);
@@ -19,7 +18,6 @@ const Section = require('./Section')(sequelize, require('sequelize').DataTypes);
 const Topic = require('./Topic')(sequelize, require('sequelize').DataTypes);
 const Request = require('./Request')(sequelize, require('sequelize').DataTypes);
 
-// Exportar modelos e instância do Sequelize
 const db = {
   User,
   Category,

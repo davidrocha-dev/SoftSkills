@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 
 const Dashboard = () => {
-  const { user, selectedRole, logout } = useAuth();
+  const { user, selectedRole } = useAuth();
   const [counts, setCounts] = useState({ formador: 0, formando: 0, active: 0, finished: 0 });
 
   useEffect(() => {

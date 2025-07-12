@@ -30,8 +30,6 @@ import ForumTopic from './components/ForumTopic';
 import ForumModeration from './components/ForumModeration';
 import Preview from './views/Preview';
 
-
-// Componente para rotas públicas (redireciona se autenticado)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   
@@ -48,7 +46,6 @@ const PublicRoute = ({ children }) => {
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
 };
 
-// Componente para páginas não encontradas
 const NotFoundRedirect = () => {
   const { isAuthenticated, loading } = useAuth();
   
@@ -90,7 +87,6 @@ function App() {
           <Route path="/contact-manager" element={<ContactManager />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           
-          {/* Rotas protegidas */}
           <Route path="/role-selection" element={
             <ProtectedRoute>
               <RoleSelection />

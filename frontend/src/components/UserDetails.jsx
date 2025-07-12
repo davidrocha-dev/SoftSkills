@@ -81,7 +81,7 @@ const UserDetails = () => {
   }
 
   const { user, enrollments = [] } = userData;
-  // Função para filtrar cursos pelo intervalo de datas e nome do curso
+
   const filteredEnrollments = enrollments.filter(e => {
     const start = e.startDate ? e.startDate.slice(0, 10) : '';
     const end = e.endDate ? e.endDate.slice(0, 10) : '';
@@ -95,7 +95,7 @@ const UserDetails = () => {
     <>
       <Header />
       <Container className="mt-4">
-        {/* Header com botão voltar */}
+  
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="mb-0">Detalhes do Utilizador</h1>
           <button
@@ -106,7 +106,7 @@ const UserDetails = () => {
           </button>
         </div>
 
-        {/* Informações do Utilizador */}
+
         <Card className="mb-4">
           <Card.Header className="bg-primary text-white">
             <h5 className="mb-0">
@@ -143,7 +143,7 @@ const UserDetails = () => {
           </Card.Body>
         </Card>
 
-        {/* Filtros */}
+
         <div className="mb-3">
           <label className="form-label me-2"><strong>Filtrar por:</strong></label>
           <span className="me-2">Início</span>
@@ -172,8 +172,7 @@ const UserDetails = () => {
             <button className="btn btn-sm btn-outline-secondary ms-2" onClick={() => { setStartDateFilter(''); setEndDateFilter(''); setCourseNameFilter(''); }}>Limpar</button>
           )}
         </div>
-
-        {/* Cursos Inscritos */}
+          
         <Card className="mb-4">
           <Card.Header className="bg-info text-white">
             <h5 className="mb-0">

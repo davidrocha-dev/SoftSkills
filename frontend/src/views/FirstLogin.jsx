@@ -32,7 +32,7 @@ const FirstLogin = () => {
     }
     
     console.log('FirstLogin: Validando token no servidor...');
-    // valida token no servidor
+
     api.get(`/auth/first-login/validate?token=${encodeURIComponent(token)}`)
       .then((response) => {
         console.log('FirstLogin: Token válido, resposta:', response.data);
@@ -60,12 +60,11 @@ const FirstLogin = () => {
     );
   }
 
-  if (!valid) return null; // já redirecionou no catch
+  if (!valid) return null;
 
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // validações
     if (newPassword !== confirmPassword) {
       setError('As senhas não coincidem');
       return;
@@ -74,7 +73,7 @@ const FirstLogin = () => {
       setError('A senha deve ter pelo menos 8 caracteres');
       return;
     }
-    // regex para número + maiúscula
+
     if (!/(?=.*\d)(?=.*[A-Z])/.test(newPassword)) {
       setError('A senha deve conter pelo menos 1 número e 1 letra maiúscula');
       return;

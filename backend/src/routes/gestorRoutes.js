@@ -10,10 +10,8 @@ const {
 const courseController = require('../controllers/courseController');
 const { authorize } = require('../middleware/authMiddleware');
 const userController = require('../controllers/userController');
-
 const router = express.Router();
 
-// Todas as rotas exigem autorização de gestor
 router.post('/users', authorize(['gestor']), createUser);
 router.get('/users', authorize(['gestor']), listUsers);
 router.patch('/users/:id/status', authorize(['gestor']), updateUserStatus);

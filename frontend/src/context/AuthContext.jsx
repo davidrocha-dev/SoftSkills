@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../components/Notification';
@@ -48,7 +47,6 @@ export const AuthProvider = ({ children }) => {
           sessionStorage.setItem('selectedRole', roles[0]);
         }
       } else {
-        // token inválido: limpar, notificar e redirecionar
         localStorage.removeItem('token');
         sessionStorage.removeItem('selectedRole');
         notify('Sessão expirada. Faça login novamente.', 'error');
@@ -70,13 +68,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // limpa estado e credenciais
     setUser(null);
     setSelectedRole(null);
     setAvailableRoles([]);
     localStorage.removeItem('token');
     sessionStorage.removeItem('selectedRole');
-    // notifica e redireciona
     notify('Você saiu da sessão.', 'info');
     navigate('/login');
   };

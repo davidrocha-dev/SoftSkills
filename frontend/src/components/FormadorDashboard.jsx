@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/authService';
 
 const FormadorDashboard = () => {
-  const { user, selectedRole, logout } = useAuth();
+  const { user, selectedRole} = useAuth();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({

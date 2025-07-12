@@ -27,7 +27,6 @@ const ForgotPassword = () => {
       }
     } catch (err) {
       console.error('Erro ao pedir reset de password:', err);
-      // Se o backend enviar mensagem de erro:
       const errMsg = err.response?.data?.error || err.response?.data?.message;
       setError(errMsg || 'Falha ao contactar o servidor. Verifique a sua ligação.');
     } finally {

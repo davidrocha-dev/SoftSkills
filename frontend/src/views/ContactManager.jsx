@@ -70,7 +70,6 @@ const ContactManager = () => {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
     
-    // Limpar erro ao digitar
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -91,12 +90,10 @@ const ContactManager = () => {
     setSubmissionStatus(null);
     
     try {
-      // Enviar dados para o backend
       const response = await api.post('/requests/create', formData);
       
       if (response.data.success) {
         setSubmissionStatus('success');
-        // Resetar formulário
         setRequestId(response.data.requestId);
         setFormData({
           workerNumber: '',
@@ -112,7 +109,6 @@ const ContactManager = () => {
     } catch (error) {
       console.error('Erro ao enviar pedido:', error);
     
-    // Mensagem de erro mais detalhada
     let errorMsg = 'Erro ao enviar pedido';
     if (error.response) {
       if (error.response.status === 404) {
@@ -265,7 +261,6 @@ const ContactManager = () => {
                   </select>
                   {errors.subject && <div className="error-message">{errors.subject}</div>}
                   
-                  {/* Campo para "Outros" assunto */}
                   {showOtherSubject && (
                     <div className="form-group" style={{ marginTop: '10px' }}>
                       <input

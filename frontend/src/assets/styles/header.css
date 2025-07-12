@@ -21,13 +21,13 @@
 }
 
 .nav-link.text-primary {
-  color: #0d6efd !important; /* Cor azul do Bootstrap */
+  color: #0d6efd !important;
 }
 .nav-link.text-primary:hover {
-  background-color: #0d6efd !important; /* Fundo azul no hover */
-  color: white !important; /* Texto branco no hover */
+  background-color: #0d6efd !important;
+  color: white !important;
 }
 .nav-link.active {
-  background-color: #0d6efd !important; /* Mantém fundo azul para item ativo */
-  color: white !important; /* Mantém texto branco para item ativo */
+  background-color: #0d6efd !important;
+  color: white !important;
 }

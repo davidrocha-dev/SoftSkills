@@ -1,7 +1,6 @@
 const { Topic, Comment, User, Reaction, Area, Category, Report } = require('../models');
 const { Op } = require('sequelize');
 
-// Buscar tópicos do fórum
 exports.getTopics = async (req, res) => {
   try {
     console.log('A buscar tópicos do fórum...');
@@ -36,7 +35,6 @@ exports.getTopics = async (req, res) => {
       ]
     });
 
-    // Buscar todos os comentários principais (parentCommentId == null e status == true)
     let mainComments = [];
     topics.forEach(topic => {
       (topic.comments || []).forEach(comment => {
@@ -46,9 +44,7 @@ exports.getTopics = async (req, res) => {
       });
     });
 
-    // Para cada comentário principal, construir o cartão
     let result = mainComments.map(({ topic, comment }) => {
-      // replies recursivos
       function buildReplies(comments, parentId) {
         return comments
           .filter(c => c.parentCommentId === parentId)
@@ -74,7 +70,7 @@ exports.getTopics = async (req, res) => {
       });
 
       return {
-        id: comment.id, // id do comentário principal
+        id: comment.id,
         topicId: topic.id,
         topicTitle: topic.description,
         authorName: comment.user?.name || 'Desconhecido',
@@ -102,13 +98,11 @@ exports.getTopics = async (req, res) => {
       };
     });
 
-    // Filtrar por categoria se fornecido
     const { category, search, sort } = req.query;
     if (category && category !== 'Todos') {
       result = result.filter(topic => topic.category === category);
     }
 
-    // Filtrar por pesquisa se fornecido
     if (search && search.trim() !== '') {
       const s = search.trim().toLowerCase();
       result = result.filter(topic =>
@@ -117,7 +111,6 @@ exports.getTopics = async (req, res) => {
       );
     }
 
-    // Ordenar por comentário mais recente ou mais antigo (considerando segundos)
     if (sort === 'recent') {
       result = result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } else if (sort === 'oldest') {
@@ -131,7 +124,6 @@ exports.getTopics = async (req, res) => {
   }
 };
 
-// Criar ou atualizar uma reação
 exports.createReaction = async (req, res) => {
   try {
     const { commentId, type, userId } = req.body;
@@ -139,7 +131,6 @@ exports.createReaction = async (req, res) => {
       return res.status(400).json({ error: 'commentId e userId são obrigatórios.' });
     }
     
-    // Validar e converter o tipo para boolean
     let reactionType;
     if (typeof type === 'boolean') {
       reactionType = type;
@@ -154,11 +145,9 @@ exports.createReaction = async (req, res) => {
     let reaction = await Reaction.findOne({ where: { commentId, userId } });
     if (reaction) {
       if (reaction.type === reactionType) {
-        // Se já existe e é igual, elimina (toggle off)
         await reaction.destroy();
         return res.json({ success: true, deleted: true });
       } else {
-        // Se já existe mas é diferente, atualiza
         reaction.type = reactionType;
         await reaction.save();
         return res.json({ success: true, updated: true });
@@ -173,7 +162,6 @@ exports.createReaction = async (req, res) => {
   }
 };
 
-// Criar um novo comentário
 exports.createComment = async (req, res) => {
   try {
     const { topicId, content, userId, parentCommentId, ficheiro } = req.body;
@@ -197,7 +185,6 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// Denunciar um comentário
 exports.createReport = async (req, res) => {
   try {
     console.log('POST /reports body:', req.body);
@@ -213,7 +200,7 @@ exports.createReport = async (req, res) => {
       userId,
       reason: reason || '',
       reportDate: now,
-      status: false // Pendente (false = pendente, true = resolvido)
+      status: false
     });
 
     console.log('Report criado:', report);
@@ -224,7 +211,6 @@ exports.createReport = async (req, res) => {
   }
 };
 
-// Devolver todos os tópicos para dropdowns
 exports.getTopicsList = async (req, res) => {
   try {
     const topics = await Topic.findAll({
@@ -236,13 +222,12 @@ exports.getTopicsList = async (req, res) => {
   }
 };
 
-// Buscar comentários pendentes de moderação
 exports.getPendingComments = async (req, res) => {
   try {
     const pendingComments = await Comment.findAll({
       where: { 
         status: false,
-        parentCommentId: null // Apenas comentários principais (sem pai)
+        parentCommentId: null
       },
       include: [
         {
@@ -293,11 +278,10 @@ exports.getPendingComments = async (req, res) => {
   }
 };
 
-// Aprovar/rejeitar comentários
 exports.moderateComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { action } = req.body; // 'approve' ou 'reject'
+    const { action } = req.body;
     
     if (!action || !['approve', 'reject'].includes(action)) {
       return res.status(400).json({ error: 'Ação inválida. Use "approve" ou "reject".' });
@@ -313,7 +297,6 @@ exports.moderateComment = async (req, res) => {
       await comment.save();
       res.json({ success: true, message: 'Comentário aprovado com sucesso.' });
     } else {
-      // Para rejeitar, podemos eliminar o comentário ou manter status false
       await comment.destroy();
       res.json({ success: true, message: 'Comentário rejeitado e eliminado.' });
     }
@@ -323,7 +306,6 @@ exports.moderateComment = async (req, res) => {
   }
 };
 
-// Buscar denúncias pendentes
 exports.getPendingReports = async (req, res) => {
   try {
     const pendingReports = await Report.findAll({
@@ -336,7 +318,7 @@ exports.getPendingReports = async (req, res) => {
           include: [
             {
               model: User,
-              as: 'user', // minúsculo para autor do comentário
+              as: 'user',
               attributes: ['name', 'workerNumber']
             },
             {
@@ -360,7 +342,7 @@ exports.getPendingReports = async (req, res) => {
         },
         {
           model: User,
-          as: 'User', // maiúsculo para utilizador do report
+          as: 'User',
           attributes: ['name', 'workerNumber']
         }
       ],
@@ -392,11 +374,10 @@ exports.getPendingReports = async (req, res) => {
   }
 };
 
-// Resolver denúncias
 exports.resolveReport = async (req, res) => {
   try {
     const { id } = req.params;
-    const { action } = req.body; // 'dismiss' ou 'remove_comment'
+    const { action } = req.body;
     
     if (!action || !['dismiss', 'remove_comment'].includes(action)) {
       return res.status(400).json({ error: 'Ação inválida. Use "dismiss" ou "remove_comment".' });
@@ -416,16 +397,13 @@ exports.resolveReport = async (req, res) => {
     }
 
     if (action === 'dismiss') {
-      // Marcar denúncia como resolvida (status = true)
       report.status = true;
       await report.save();
       res.json({ success: true, message: 'Denúncia arquivada com sucesso.' });
     } else {
-      // Eliminar o comentário denunciado
       if (report.Comment) {
         await report.Comment.destroy();
       }
-      // Marcar denúncia como resolvida
       report.status = true;
       await report.save();
       res.json({ success: true, message: 'Comentário removido e denúncia arquivada.' });

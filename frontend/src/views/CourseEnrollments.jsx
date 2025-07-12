@@ -27,7 +27,6 @@ export default function CourseEnrollments() {
     fetchEnrollments();
   }, [id]);
 
-  // Função para aceitar inscrição
   const handleAccept = async (enrollmentId) => {
     try {
       await api.patch(`/enrollments/${enrollmentId}`, { status: 'Ativo' });
@@ -37,7 +36,6 @@ export default function CourseEnrollments() {
     }
   };
 
-  // Função para remover inscrição
   const handleRemove = async (enrollmentId) => {
     try {
       await api.delete(`/enrollments/${enrollmentId}`);

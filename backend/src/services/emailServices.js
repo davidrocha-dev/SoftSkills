@@ -2,7 +2,7 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 
 console.log('[EmailService] Configurando transporte de email...');
-console.log(`Usando usuário: ${process.env.EMAIL_USER}`);
+console.log(`Usando utilizador: ${process.env.EMAIL_USER}`);
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -17,7 +17,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verificar configuração do transporte
 transporter.verify((error, success) => {
   if (error) {
     console.error('[EmailService] Erro na configuração do transporte:', error);
@@ -29,14 +28,12 @@ transporter.verify((error, success) => {
 exports.sendRegistrationEmail = async (email, userData) => {
   console.log(`[EmailService] Preparando email para: ${email}`);
   
-  // Verificar se FRONTEND_URL está definida
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) {
     console.error('[EmailService] ERRO: FRONTEND_URL não está definida no ambiente!');
     console.error('[EmailService] Por favor, defina FRONTEND_URL no seu .env ou variáveis de ambiente');
   }
   
-  // Criar o link com validação
   const firstLoginLink = frontendUrl 
     ? `${frontendUrl}/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`
     : `http://localhost:5173/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`;
@@ -244,7 +241,6 @@ exports.sendRequestConfirmation = async (requestData) => {
 };
 
 exports.sendRequestResolved = async (requestData) => {
-  // Mesma formatação do email de confirmação, apenas título e status ajustados
   try {
     const currentYear = new Date().getFullYear();
     const mailOptions = {
@@ -314,14 +310,12 @@ exports.sendRequestResolved = async (requestData) => {
 };
 
 exports.sendPasswordReset = async ({ name, email, resetToken }) => {
-  // Verificar se FRONTEND_URL está definida
   const frontendUrl = process.env.FRONTEND_URL;
   if (!frontendUrl) {
     console.error('[EmailService] ERRO: FRONTEND_URL não está definida no ambiente!');
     console.error('[EmailService] Por favor, defina FRONTEND_URL no seu .env ou variáveis de ambiente');
   }
-  
-  // Criar o link com validação
+
   const resetLink = frontendUrl 
     ? `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`
     : `http://localhost:5173/reset-password?token=${encodeURIComponent(resetToken)}`;

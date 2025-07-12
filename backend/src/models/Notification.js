@@ -1,4 +1,3 @@
-// models/Notification.js
 module.exports = (sequelize, DataTypes) => {
   const Notification = sequelize.define('Notification', {
     id: {
@@ -51,7 +50,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações
   Notification.associate = function(models) {
     Notification.belongsTo(models.User, {
       foreignKey: 'n_trabalhador',

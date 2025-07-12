@@ -108,17 +108,17 @@ exports.verifyAccount = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     
     if (!user) {
-      console.log(`[VerifyAccount] Usuário não encontrado: ${email}`);
+      console.log(`[VerifyAccount] Utilizador não encontrado: ${email}`);
       return res.status(404).json({ 
         success: false,
-        error: 'Usuário não encontrado' 
+        error: 'Utilizador não encontrado' 
       });
     }
 
     console.log(`[VerifyAccount] Status atual: isVerified=${user.isVerified}, id=${user.id}`);
     
     if (user.isVerified) {
-      console.log(`[VerifyAccount] Usuário já verificado: ${email}`);
+      console.log(`[VerifyAccount] Utilizador já verificado: ${email}`);
       return res.json({ 
         success: true,
         message: 'Conta já verificada anteriormente' 
@@ -157,14 +157,14 @@ exports.firstLogin = async (req, res) => {
     
 console.log('[FirstLogin] Verificando token...');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('[FirstLogin] Token válido para usuário:', decoded.userId);
+    console.log('[FirstLogin] Token válido para utilizador:', decoded.userId);
 
-    console.log('[FirstLogin] Buscando usuário ID:', decoded.userId);
+    console.log('[FirstLogin] Buscando utilizador ID:', decoded.userId);
     const user = await User.findByPk(decoded.userId);
     if (!user) {
       return res.status(404).json({ 
         success: false,
-        error: 'Usuário não encontrado' 
+        error: 'Utilizador não encontrado' 
       });
     }
 
@@ -272,7 +272,7 @@ exports.validateFirstLogin = async (req, res) => {
     
     const user = await User.findByPk(decoded.userId);
     if (!user) {
-      return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+      return res.status(404).json({ success: false, error: 'Utilizador não encontrado' });
     }
     
     if (user.firstLoginTokenExpiry && new Date() > user.firstLoginTokenExpiry) {

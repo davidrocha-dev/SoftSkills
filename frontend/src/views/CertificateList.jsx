@@ -17,7 +17,6 @@ export default function CertificateList() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Buscar certificados e dados do curso em paralelo
                 const [certificatesResponse, courseResponse] = await Promise.all([
                     api.get(`/certificates/course/${courseId}`),
                     api.get(`/cursos/${courseId}`)

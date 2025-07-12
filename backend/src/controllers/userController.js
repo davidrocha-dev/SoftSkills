@@ -17,7 +17,7 @@ exports.getProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Usuário não encontrado' 
+        message: 'Utilizador não encontrado' 
       });
     }
     
@@ -112,7 +112,6 @@ exports.deleteUser = async (req, res) => {
   try {
 
     const { id } = req.params;
-    // Impedir autoeliminação
     if (parseInt(id) === req.user.id) {
       return res.status(403).json({
         success: false,
@@ -125,47 +124,33 @@ exports.deleteUser = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Utilizador não encontrado' });
     }
 
-
-    // Eliminar todas as inscrições associadas ao utilizador (não bloquear se existirem)
-
-    // 1) Apagar inscrições associadas ao utilizador
     await Enrollment.destroy({ where: { userId: id } });
 
 
-    // 2) Apagar pedidos de suporte associados ao utilizador
     await Request.destroy({ where: { workerNumber: user.workerNumber } });
 
-    // 3) Apagar interesses associados ao utilizador
     await Interest.destroy({ where: { workerNumber: user.workerNumber } });
 
-    // 4) Apagar certificados associados ao utilizador
     const { Certificate, Notification, Reaction, Comment, Report } = require('../models');
     await Certificate.destroy({ where: { workerNumber: user.workerNumber } });
 
-    // 5) Apagar notificações associadas ao utilizador (workerNumber)
     await Notification.destroy({ where: { workerNumber: user.workerNumber } });
 
-    // 6) Apagar reações associadas ao utilizador
     await Reaction.destroy({ where: { userId: id } });
 
-    // 7) Apagar comentários associados ao utilizador
     await Comment.destroy({ where: { userId: id } });
 
-    // 8) Apagar relatórios feitos pelo utilizador
     await Report.destroy({ where: { userId: id } });
 
-    // 9) Limpar o campo formador nos cursos onde o utilizador era instrutor
     await Course.update(
       { instructor: '' },
       { where: { instructor: user.name } }
     );
 
-    // 9) Finalmente elimina o utilizador
     await user.destroy();
     return res.json({ success: true });
   } catch (error) {
     console.error('Erro ao eliminar utilizador:', error);
-    // captura erro de FK caso haja outra relação que não contámos
     if (error.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(400).json({
         success: false,
@@ -193,7 +178,6 @@ exports.createUser = async (req, res) => {
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-    // Criar o usuário
     const user = await User.create({
       name: name.trim(),
       email: email.trim(),
@@ -207,24 +191,21 @@ exports.createUser = async (req, res) => {
       pfp: "https://res.cloudinary.com/dnhahua4h/image/upload/v1752293427/user-img_sljz04.png"
     });
 
-    // Gerar token first login
     const firstLoginToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     );
 
-    const expiry = new Date(Date.now() + 2 * 3600 * 1000); // 1h
+    const expiry = new Date(Date.now() + 2 * 3600 * 1000);
     user.firstLoginToken = firstLoginToken;
     user.firstLoginTokenExpiry = expiry;
     await user.save();
 
-    // Guardar token e expiry no utilizador
     user.firstLoginToken = firstLoginToken;
     user.firstLoginTokenExpiry = expiry;
     await user.save();
 
-    // Enviar email com o token
     try {
       await emailService.sendRegistrationEmail(email, {
         name,
@@ -237,7 +218,7 @@ exports.createUser = async (req, res) => {
     }
 
     res.status(201).json({
-      message: 'Usuário criado com sucesso',
+      message: 'Utilizador criado com sucesso',
       userId: user.id,
       emailSent: true
     });
@@ -278,17 +259,14 @@ exports.passwordReset = async (req, res) => {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ success:false, error:'Utilizador não encontrado' });
 
-    // gerar token
     const rawToken = `${user.id}-${Date.now()}`;
     const resetToken = await bcrypt.hash(rawToken, 10);
-    const expiry = new Date(Date.now() + 3600 * 1000); // 1h
+    const expiry = new Date(Date.now() + 3600 * 1000);
 
-    // guardar no utilizador
     user.resetToken = resetToken;
     user.resetTokenExpiry = expiry;
     await user.save();
 
-    // enviar email
     await emailService.sendPasswordReset({
       name: user.name,
       email: user.email,
@@ -309,7 +287,6 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ success:false, error:'Token e nova password são obrigatórios' });
     }
 
-    // procurar utilizador com token válido e não expirado
     const user = await User.findOne({
       where: {
         resetToken: token,
@@ -320,9 +297,7 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ success:false, error:'Token inválido ou expirado' });
     }
 
-    // atualizar password
     user.password = await bcrypt.hash(newPassword, 10);
-    // limpar token
     user.resetToken = null;
     user.resetTokenExpiry = null;
     await user.save();
@@ -344,7 +319,6 @@ exports.updateUser = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Utilizador não encontrado' });
     }
 
-    // Atualiza campos permitidos
     if (name !== undefined) user.name = name;
     if (email !== undefined) user.email = email;
     if (pfp !== undefined) user.pfp = pfp;
@@ -405,24 +379,19 @@ exports.requestPasswordResetByEmail = async (req, res) => {
     if (!email) {
       return res.status(400).json({ success: false, error: 'Email é obrigatório' });
     }
-
-    // 1) Encontrar utilizador pelo email
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(404).json({ success: false, error: 'Utilizador não encontrado' });
     }
 
-    // 2) Gerar token e expiry
     const rawToken = `${user.id}-${Date.now()}`;
     const resetToken = await bcrypt.hash(rawToken, 10);
     const expiry     = new Date(Date.now() + 3600 * 1000);
 
-    // 3) Guardar no utilizador
     user.resetToken        = resetToken;
     user.resetTokenExpiry = expiry;
     await user.save();
 
-    // 4) Enviar e-mail
     await emailService.sendPasswordReset({
       name:  user.name,
       email: user.email,

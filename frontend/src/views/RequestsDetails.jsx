@@ -1,4 +1,3 @@
-// src/views/RequestsDetails.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -6,7 +5,6 @@ import {
   Row,
   Col,
   Card,
-  Spinner,
   Badge,
   Button,
   Form,
@@ -108,7 +106,6 @@ const RequestDetailsPage = () => {
         {error && <Alert variant="danger">{error}</Alert>}
 
         <Row>
-          {/* Coluna esquerda: ocupa largura total se resolvido, senão 8/12 */}
           <Col md={leftColSize}>
             <Card className="mb-4">
               <Card.Header>
@@ -167,7 +164,6 @@ const RequestDetailsPage = () => {
             )}
           </Col>
 
-          {/* Coluna direita: apenas se não estiver resolvido */}
           {!isResolved && (
             <Col md={4} className="d-flex flex-column align-items-start">
               <Card className="mb-4 w-100">
