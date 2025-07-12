@@ -39,8 +39,8 @@ const ForgotPassword = () => {
   return (
     <>
       <Header />
-      <div className="login-page">
-        <div className="login-content">
+      <div className="login-page" style={{ background: '#fff', minHeight: '100vh' }}>
+        <div className="login-content" style={{ background: '#fff' }}>
           <img src={logo} alt="Logo" className="img-logo" />
           <h2 className="login-title">Recuperar Senha</h2>
           <p className="login-subtitle">
@@ -89,7 +89,7 @@ const ForgotPassword = () => {
           </div>
         </div>
       
-        <div className="login-footer">
+        <div className="login-footer" style={{ background: '#fff' }}>
           <p>© 2025 SOFTINSA. Todos os direitos reservados.</p>
         </div>
       </div>
