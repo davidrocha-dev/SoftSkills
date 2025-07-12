@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, ProgressBar, Alert } from 'react-bootstrap';
 import { api } from '../services/authService';
 
-const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resource', acceptedFiles = "*", buttonText = "Escolher Arquivo", buttonSize = "sm" }) => {
+const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resource', acceptedFiles = "*", buttonText = "Escolher Ficheiro", buttonSize = "sm" }) => {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
@@ -14,14 +14,14 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
 
     if (uploadType === 'course-image') {
         if (!file.type.startsWith('image/')) {
-            setError('Apenas arquivos de imagem são permitidos');
+            setError('Apenas ficheiros de imagem são permitidos');
             return;
         }
     }
 
     const maxSize = uploadType === 'course-image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      setError(`Arquivo muito grande. Tamanho máximo: ${maxSize / (1024 * 1024)}MB`);
+      setError(`Ficheiro muito grande. Tamanho máximo: ${maxSize / (1024 * 1024)}MB`);
         return;
     }
 
@@ -53,7 +53,7 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
             onUploadError && onUploadError(response.data.message);
         }
         } catch (err) {
-        const errorMessage = err.response?.data?.message || 'Erro ao fazer upload do arquivo';
+        const errorMessage = err.response?.data?.message || 'Erro ao fazer upload do ficheiro';
         setError(errorMessage);
         onUploadError && onUploadError(errorMessage);
         } finally {
