@@ -36,7 +36,7 @@ const uploadCourseResource = multer({
 const uploadCourseImage = multer({ 
   storage: courseImageStorage,
   fileFilter: (req, file, cb) => {
-    console.log('[upload] Recebido arquivo:', file.originalname, file.mimetype);
+    console.log('[upload] Recebido ficheiro:', file.originalname, file.mimetype);
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {

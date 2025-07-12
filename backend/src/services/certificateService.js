@@ -122,13 +122,13 @@ const generateCertificatePDF = async (certificateData) => {
 
 const savePDFLocally = async (pdfBuffer, certificateId) => {
     try {
-        console.log('📁 Criando diretório temporário...');
+        console.log('Criando diretório temporário...');
         const tempDir = path.join(__dirname, '../../temp');
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir, { recursive: true });
         }
         const filePath = path.join(tempDir, `certificate_${certificateId}.pdf`);
-        console.log('💾 Salvando PDF localmente...');
+        console.log('Salvando PDF localmente...');
         fs.writeFileSync(filePath, pdfBuffer);
         console.log('PDF salvo localmente:', filePath);
         return filePath;
@@ -140,7 +140,7 @@ const savePDFLocally = async (pdfBuffer, certificateId) => {
 
 const uploadToCloudinary = async (filePath, certificateId) => {
     try {
-        console.log('☁️ Fazendo upload para Cloudinary...');
+        console.log('Fazendo upload para Cloudinary...');
         const result = await cloudinary.uploader.upload(filePath, {
             folder: 'certificates',
             public_id: `certificate_${certificateId}`,
@@ -148,7 +148,7 @@ const uploadToCloudinary = async (filePath, certificateId) => {
             format: 'pdf'
         });
         console.log('Upload para Cloudinary concluído!');
-        console.log('📄 URL:', result.secure_url);
+        console.log('URL:', result.secure_url);
         return result.secure_url;
     } catch (error) {
         console.error('Erro ao fazer upload para Cloudinary:', error);
@@ -159,15 +159,15 @@ const uploadToCloudinary = async (filePath, certificateId) => {
 
 const deleteLocalFile = async (filePath) => {
     try {
-        console.log('🗑️ Eliminando arquivo local...');
+        console.log('Eliminando ficheiro local...');
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log('Arquivo local eliminado:', filePath);
+            console.log('Ficheiro local eliminado:', filePath);
         } else {
-            console.log('Arquivo local não encontrado:', filePath);
+            console.log('Ficheiro local não encontrado:', filePath);
         }
     } catch (error) {
-        console.error('Erro ao eliminar arquivo local:', error);
+        console.error('Erro ao eliminar ficheiro local:', error);
     }
 };
 

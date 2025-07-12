@@ -15,12 +15,12 @@ const uploadResource = (req, res, next) => {
 router.post('/resource', uploadResource, (req, res) => {
   console.log('[uploadResource] req.file:', req.file);
   if (!req.file) {
-    console.warn('[uploadResource] Nenhum arquivo enviado');
-    return res.status(400).json({ success: false, error: 'Nenhum arquivo enviado' });
+    console.warn('[uploadResource] Nenhum ficheiro enviado');
+    return res.status(400).json({ success: false, error: 'Nenhum ficheiro enviado' });
   }
 
   const fileUrl = req.file.path;
-  console.log('[uploadResource] URL do arquivo:', fileUrl);
+  console.log('[uploadResource] URL do ficheiro:', fileUrl);
   return res.status(200).json({ success: true, fileUrl });
 });
 
