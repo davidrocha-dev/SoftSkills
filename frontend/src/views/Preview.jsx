@@ -169,13 +169,13 @@ const Preview = () => {
           <Link to="/login" className="btn btn-primary hero-btn mb-3 d-flex align-items-center justify-content-center" style={{ fontWeight: 600, fontSize: '1.1rem', padding: '1rem 2.5rem', borderRadius: 50, minWidth: 220 }}>
             Aceder à Plataforma
           </Link>
-          <button type="button" className="btn btn-outline-secondary hero-btn d-flex align-items-center justify-content-center" style={{ fontWeight: 600, fontSize: '1.1rem', padding: '1rem 2.5rem', borderRadius: 50, minWidth: 220 }}>
+          <a href="https://drive.google.com/file/d/13NcgKF52g1y5CkmrgXy_Alq4JtfNdx_v/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary hero-btn d-flex align-items-center justify-content-center" style={{ fontWeight: 600, fontSize: '1.1rem', padding: '1rem 2.5rem', borderRadius: 50, minWidth: 220 }}>
             <FaAndroid className="android-icon me-2" />
             <span className="d-flex flex-column align-items-center w-100">
               <span>Descarregar</span>
               <span style={{ fontSize: '0.8rem', color: '#888', lineHeight: 1 }}>Android</span>
             </span>
-          </button>
+          </a>
         </div>
 
         <section className="features-section py-5">
