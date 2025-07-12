@@ -21,14 +21,33 @@ const FirstLogin = () => {
   const { logout } = useAuth();
 
   useEffect(() => {
+    console.log('FirstLogin useEffect - token:', token);
+    console.log('FirstLogin useEffect - loading:', loading);
+    console.log('FirstLogin useEffect - isValidating:', isValidating);
+    
     if (!token) {
+      console.log('FirstLogin: Sem token, redirecionando para login');
+      setLoading(false);
       return navigate('/login', { replace: true });
     }
+    
+    console.log('FirstLogin: Validando token no servidor...');
     // valida token no servidor
     api.get(`/auth/first-login/validate?token=${encodeURIComponent(token)}`)
-      .then(() => setValid(true))
-      .catch(() => navigate('/login', { replace: true }))
-      .finally(() => setIsValidating(false));
+      .then((response) => {
+        console.log('FirstLogin: Token válido, resposta:', response.data);
+        setValid(true);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('FirstLogin: Erro ao validar token:', error);
+        setLoading(false);
+        navigate('/login', { replace: true });
+      })
+      .finally(() => {
+        console.log('FirstLogin: Finalizando validação');
+        setIsValidating(false);
+      });
   }, [token, navigate]);
 
   if (loading) return <Loading />;

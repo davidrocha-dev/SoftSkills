@@ -277,22 +277,36 @@ console.log('[FirstLogin] Verificando token...');
 };
 
 exports.validateFirstLogin = async (req, res) => {
-  const { token } = req.query;
-  if (!token) {
-    return res.status(400).json({ success: false, error: 'Token em falta' });
-  }
-  // procura o utilizador com esse token e tokenExpiry > now
-  const user = await User.findOne({
-    where: {
-      firstLoginToken: token,
-      firstLoginTokenExpiry: { [Op.gt]: new Date() }
+  try {
+    const { token } = req.query;
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Token em falta' });
     }
-  });
-  
-  if (!user) {
-    return res.status(400).json({ success: false, error: 'Token inválido ou expirado' });
-  }
-  return res.json({ success: true });
 
-  
+    // Verificar se o token JWT é válido
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Buscar o usuário pelo ID do token
+    const user = await User.findByPk(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+    }
+
+    // Verificar se o token ainda é válido (não expirado)
+    if (user.firstLoginTokenExpiry && new Date() > user.firstLoginTokenExpiry) {
+      return res.status(401).json({ success: false, error: 'Token expirado' });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('[ValidateFirstLogin] Erro:', error);
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, error: 'Token expirado' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ success: false, error: 'Token inválido' });
+    }
+    
+    return res.status(500).json({ success: false, error: 'Erro interno no servidor' });
+  }
 };
