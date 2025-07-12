@@ -35,7 +35,8 @@ exports.sendRegistrationEmail = async (email, userData) => {
   }
   
   const firstLoginLink = frontendUrl 
-    ? `${frontendUrl}/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`;
+    ? `${frontendUrl}/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`
+    : `https://pint2-1.onrender.com/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`;
   
   console.log('[EmailService] Link gerado:', firstLoginLink);
   
@@ -316,7 +317,8 @@ exports.sendPasswordReset = async ({ name, email, resetToken }) => {
   }
 
   const resetLink = frontendUrl 
-    ? `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+    ? `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`
+    : `https://pint2-1.onrender.com/reset-password?token=${encodeURIComponent(resetToken)}`;
   
   console.log('[EmailService] Link de reset gerado:', resetLink);
   const currentYear = new Date().getFullYear();
