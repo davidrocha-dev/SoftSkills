@@ -9,6 +9,6 @@ router.post('/verify-account', authController.verifyAccount);
 router.get('/verify-account', authController.verifyAccount);
 
 router.get('/first-login/validate', authController.validateFirstLogin);
-router.post('/first-login', verifyToken, authController.firstLogin);
+router.post('/first-login', authController.firstLogin);
 
 module.exports = router;
