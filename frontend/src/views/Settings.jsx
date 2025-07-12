@@ -1,6 +1,7 @@
 // src/views/Settings.jsx
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 import Header from '../components/Header';
@@ -71,8 +72,9 @@ const SettingsPage = () => {
             <Container className="my-5">
                 <div className="d-flex justify-content-end mb-3">
                     <Button 
+                        as={Link}
+                        to={`/id/${user.workerNumber}`}
                         variant="outline-primary" 
-                        onClick={() => window.location.href = `/id/${user.workerNumber}`}
                         className="fw-medium"
                     >
                         <i className="bi bi-person-circle me-2"></i>

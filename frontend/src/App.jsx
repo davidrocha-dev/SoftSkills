@@ -18,9 +18,7 @@ import RequestsDetails from './views/RequestsDetails';
 import SettingsPage from './views/Settings';
 import ResetPassword from './views/ResetPassword';
 import UserDetails from './components/UserDetails';
-//import Forum from './components/Forum';
 import Course from './views/Course';
-//import Discussion from './components/Discussion';
 import EditCourse from './views/EditCourse';
 import CourseEnrollments from './views/CourseEnrollments';
 import CertificateManagement from './views/CertificateManagement';
@@ -30,6 +28,7 @@ import './assets/styles/main.css';
 import Forum from './views/Forum';
 import ForumTopic from './components/ForumTopic';
 import ForumModeration from './components/ForumModeration';
+import Preview from './views/Preview';
 
 
 // Componente para rotas públicas (redireciona se autenticado)
@@ -71,6 +70,8 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/preview" element={<Preview />} />
+          
           <Route path="/login" element={
             <PublicRoute>
               <Login />
