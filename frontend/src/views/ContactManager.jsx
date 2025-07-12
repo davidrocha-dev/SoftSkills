@@ -134,8 +134,8 @@ const ContactManager = () => {
   return (
     <>
       <Header />
-      <div className="login-page">
-        <div className="login-content">
+      <div className="login-page" style={{ background: '#fff', minHeight: '100vh' }}>
+        <div className="login-content" style={{ background: '#fff' }}>
 
           {errors.server && (
             <div className="login-error">
@@ -318,7 +318,7 @@ const ContactManager = () => {
           )}
         </div>
       
-        <div className="login-footer">
+        <div className="login-footer" style={{ background: '#fff' }}>
           <p>© 2025 SOFTINSA. Todos os direitos reservados.</p>
         </div>
       </div>
