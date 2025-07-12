@@ -1,5 +1,6 @@
 // controllers/enrollmentController.js
 const { Enrollment, Course, User } = require('../models');
+const emailService = require('../services/emailServices');
 
 exports.listEnrollments = async (req, res) => {
   try {
@@ -116,8 +117,24 @@ exports.updateEnrollmentStatus = async (req, res) => {
     if (!enrollment) {
       return res.status(404).json({ error: 'Inscrição não encontrada' });
     }
+    const prevStatus = enrollment.status;
     enrollment.status = status;
     await enrollment.save();
+
+    // Se mudou para Ativo, enviar email
+    if (prevStatus !== 'Ativo' && status === 'Ativo') {
+      // Buscar dados do utilizador e curso
+      const user = await User.findByPk(enrollment.userId);
+      const course = await Course.findByPk(enrollment.courseId);
+      if (user && course) {
+        try {
+          await emailService.sendEnrollmentActivatedEmail(user.email, user.name, course.title);
+        } catch (err) {
+          console.error('Erro ao enviar email de ativação de inscrição:', err);
+        }
+      }
+    }
+
     res.json(enrollment);
   } catch (error) {
     console.error('Erro ao atualizar inscrição:', error);

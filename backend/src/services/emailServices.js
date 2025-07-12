@@ -424,3 +424,28 @@ exports.sendPasswordReset = async ({ name, email, resetToken }) => {
     throw err;
   }
 };
+
+exports.sendEnrollmentActivatedEmail = async (email, userName, courseTitle) => {
+  const mailOptions = {
+    from: `Softinsa Formação <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Inscrição Ativada: ${courseTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Olá, ${userName}!</h2>
+        <p>A sua inscrição foi <strong>ativada</strong> para o curso <strong>"${courseTitle}"</strong>.</p>
+        <p>Já pode aceder ao conteúdo e participar normalmente.</p>
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+        <p>Atenciosamente,<br>Equipa de Formação Softinsa</p>
+      </div>
+    `
+  };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[EmailService] Email de ativação de inscrição enviado para ${email}. Message ID:`, info.messageId);
+    return true;
+  } catch (error) {
+    console.error('[EmailService] Erro ao enviar email de ativação de inscrição:', error);
+    throw error;
+  }
+};
