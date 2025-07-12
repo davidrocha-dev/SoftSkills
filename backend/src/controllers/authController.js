@@ -140,7 +140,7 @@ exports.verifyAccount = async (req, res) => {
     let errorMessage = 'Erro interno no servidor';
     
     if (error.name === 'SequelizeConnectionError') {
-      errorMessage = 'Erro de conexão com o banco de dados';
+      errorMessage = 'Erro de conexão com a base de dados';
     }
     
     res.status(500).json({ 
