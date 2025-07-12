@@ -29,8 +29,19 @@ transporter.verify((error, success) => {
 exports.sendRegistrationEmail = async (email, userData) => {
   console.log(`[EmailService] Preparando email para: ${email}`);
   
-  // Corrigir: Mover a criação do link para dentro da função usando o parâmetro email
-  const firstLoginLink = `${process.env.FRONTEND_URL}/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`;
+  // Verificar se FRONTEND_URL está definida
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    console.error('[EmailService] ERRO: FRONTEND_URL não está definida no ambiente!');
+    console.error('[EmailService] Por favor, defina FRONTEND_URL no seu .env ou variáveis de ambiente');
+  }
+  
+  // Criar o link com validação
+  const firstLoginLink = frontendUrl 
+    ? `${frontendUrl}/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`
+    : `http://localhost:5173/first-login?token=${encodeURIComponent(userData.firstLoginToken)}`;
+  
+  console.log('[EmailService] Link gerado:', firstLoginLink);
   
   const mailOptions = {
     from: `Softinsa Formação <${process.env.EMAIL_USER}>`,
@@ -303,7 +314,19 @@ exports.sendRequestResolved = async (requestData) => {
 };
 
 exports.sendPasswordReset = async ({ name, email, resetToken }) => {
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
+  // Verificar se FRONTEND_URL está definida
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    console.error('[EmailService] ERRO: FRONTEND_URL não está definida no ambiente!');
+    console.error('[EmailService] Por favor, defina FRONTEND_URL no seu .env ou variáveis de ambiente');
+  }
+  
+  // Criar o link com validação
+  const resetLink = frontendUrl 
+    ? `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}`
+    : `http://localhost:5173/reset-password?token=${encodeURIComponent(resetToken)}`;
+  
+  console.log('[EmailService] Link de reset gerado:', resetLink);
   const currentYear = new Date().getFullYear();
 
   const mailOptions = {
