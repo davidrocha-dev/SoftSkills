@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { api } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { Container, Row, Col, Card, Form, Button, Spinner, Alert, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { BiLike, BiDislike } from 'react-icons/bi';
 import Select from 'react-select';
 
 const Forum = () => {
@@ -12,25 +11,21 @@ const Forum = () => {
   const [topics, setTopics] = useState([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('Todos');
-  const [order, setOrder] = useState('recent'); // Valor inicial para mais recentes
+  const [order, setOrder] = useState('recent');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newTopicTitle, setNewTopicTitle] = useState('');
-  const [newTopicCategory, setNewTopicCategory] = useState(null);
   const [newTopicContent, setNewTopicContent] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
   const [topicOptions, setTopicOptions] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  // 1. Adiciona um estado para a mensagem de sucesso
   const [pendingMsg, setPendingMsg] = useState('');
 
   useEffect(() => {
     fetchTopics();
     fetchCategories();
-    // eslint-disable-next-line
   }, [category, order, search]);
 
   const fetchTopics = async () => {
@@ -40,7 +35,7 @@ const Forum = () => {
         params: {
           search: search || undefined,
           category: category !== 'Todos' ? category : undefined,
-          sort: order // Envia 'recent' ou 'oldest' para o backend
+          sort: order
         }
       });
       setTopics(res.data.topics || []);
@@ -76,20 +71,17 @@ const Forum = () => {
         type,
         userId: user.id
       });
-      // Atualiza os tópicos para refletir a reação
       fetchTopics();
     } catch (err) {
       alert('Erro ao registar reação.');
     }
   };
 
-  // Preparar opções para o react-select
   const categoryOptions = [
     { value: 'Todos', label: 'Todas as categorias' },
     ...categories.map(cat => ({ value: cat.description, label: cat.description }))
   ];
 
-  // Buscar tópicos para o dropdown ao abrir o modal
   const fetchTopicOptions = async () => {
     try {
       const res = await api.get('/forum/topics-list');
@@ -99,7 +91,6 @@ const Forum = () => {
     }
   };
 
-  // Ao abrir o modal, buscar tópicos
   const handleOpenModal = () => {
     setShowModal(true);
     fetchTopicOptions();
@@ -133,7 +124,6 @@ const Forum = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          {/* Substituir Form.Select por Select pesquisável */}
           <div style={{ minWidth: 220 }}>
             <Select
               options={categoryOptions}
@@ -147,7 +137,6 @@ const Forum = () => {
             <option value="recent">Mais recentes</option>
             <option value="oldest">Mais antigos</option>
           </Form.Select>
-          {/* Botão para abrir modal de novo tópico */}
           <Button className="btn btn-primary ms-auto" onClick={handleOpenModal}>Criar novo comentário</Button>
         </Form>
         {error && <Alert variant="danger">{error}</Alert>}
@@ -184,7 +173,6 @@ const Forum = () => {
           )}
         </Row>
       </Container>
-      {/* Modal para criar novo tópico */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Criar novo comentário</Modal.Title>
@@ -200,7 +188,6 @@ const Forum = () => {
                 content: newTopicContent,
                 userId: user?.id
               });
-              // 2. No onSubmit do Form do modal, após criar o comentário com sucesso:
               setShowModal(false);
               setSelectedTopic(null);
               setNewTopicContent('');

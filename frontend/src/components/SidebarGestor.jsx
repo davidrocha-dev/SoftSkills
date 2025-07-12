@@ -8,11 +8,9 @@ const SidebarGestor = () => {
   const { logout, selectRole } = useAuth();
   const navigate = useNavigate();
 
-  // ref para o offcanvas
   const offcanvasRef = useRef(null);
   const offcanvasInstance = useRef(null);
 
-  // inicializa o offcanvas do Bootstrap para transições suaves
   useEffect(() => {
     if (offcanvasRef.current) {
       offcanvasInstance.current = new bootstrap.Offcanvas(offcanvasRef.current, {

@@ -83,13 +83,12 @@ const ForumTopic = () => {
 
   useEffect(() => {
     fetchTopic();
-    // eslint-disable-next-line
   }, [id]);
 
   const fetchTopic = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/forum/topics`); // Reutiliza endpoint, filtra no frontend
+      const res = await api.get(`/forum/topics`);
       const found = (res.data.topics || []).find(t => t.id === Number(id));
       setTopic(found || null);
       setError(found ? '' : 'Tópico não encontrado.');
@@ -107,7 +106,7 @@ const ForumTopic = () => {
     try {
       await api.post('/forum/reactions', {
         commentId,
-        type, // Enviar booleano diretamente
+        type,
         userId: user.id
       });
       fetchTopic();
@@ -233,7 +232,6 @@ const ForumTopic = () => {
         )}
         <Button as={Link} to="/forum" variant="secondary" className="mt-3">Voltar ao Fórum</Button>
       </Container>
-      {/* Modal de denúncia */}
       <Modal show={showReportModal} onHide={() => setShowReportModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Denunciar comentário</Modal.Title>

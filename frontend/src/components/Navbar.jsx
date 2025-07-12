@@ -60,7 +60,6 @@ const Navbar = () => {
     navigateAndDispatch('/dashboard', 'searchCourses', { searchTerm: searchTerm.trim() });
   };
 
-  // Nova função para limpar todos os filtros como o botão "Limpar Todos"
   const handleHomeClick = (e) => {
     e.preventDefault();
     navigate('/dashboard');

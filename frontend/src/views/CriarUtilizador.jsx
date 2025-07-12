@@ -20,10 +20,8 @@ const CriarUtilizador = () => {
   const { selectedRole } = useAuth();
   const navigate = useNavigate();
 
-  // Referência para o componente UserList
   const userListRef = useRef(null);
 
-  // Estados para o modal de resultado
   const [showResultModal, setShowResultModal] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -64,10 +62,8 @@ const CriarUtilizador = () => {
         timeout: 15000
       });
 
-      // DEBUG: Verificar a resposta
       console.log('Resposta da criação:', res.data);
 
-      // Mensagem de sucesso
       const newUserId = res.data.id || res.data.userId || res.data.user?.id;
       if (!newUserId) {
         throw new Error('ID do novo utilizador não foi retornado pelo servidor');
@@ -77,7 +73,6 @@ const CriarUtilizador = () => {
       setIsSuccess(true);
       setShowResultModal(true);
 
-      // Resetar o formulário
       setForm({
         workerNumber: '',
         name: '',
@@ -85,7 +80,6 @@ const CriarUtilizador = () => {
         primaryRole: 'formando'
       });
 
-      // Atualizar a lista de utilizadores
       if (userListRef.current) {
         userListRef.current.loadUsers();
       }
@@ -272,8 +266,7 @@ const CriarUtilizador = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal de Resultado */}
+      
       <Modal 
         show={showResultModal} 
         onHide={() => setShowResultModal(false)}

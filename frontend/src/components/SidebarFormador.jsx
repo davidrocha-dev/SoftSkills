@@ -8,11 +8,9 @@ const SidebarFormador = () => {
   const { logout, selectRole } = useAuth();
   const navigate = useNavigate();
 
-  // ref para o offcanvas
   const offcanvasRef = useRef(null);
   const offcanvasInstance = useRef(null);
 
-  // inicializa o offcanvas do Bootstrap para transições suaves
   useEffect(() => {
     if (offcanvasRef.current) {
       offcanvasInstance.current = new bootstrap.Offcanvas(offcanvasRef.current, {
@@ -99,7 +97,6 @@ const SidebarFormador = () => {
           </nav>
 
           <nav className="nav nav-pills flex-column">
-            {/* Novo botão de suporte */}
             <button
               className="nav-link mb-2 bg-white border-0 text-start text-primary"
               onClick={goToSupport}

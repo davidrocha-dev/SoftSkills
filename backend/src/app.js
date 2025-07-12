@@ -19,6 +19,7 @@ const resourceTypeRoutes = require('./routes/resourceTypeRoutes');
 const certificateRoutes = require('./routes/certificateRoutes');
 const seed = require('./seed');
 const { sequelize } = require('./models');
+require ('dotenv').config();
 
 const cron = require('node-cron');
 const { Op } = require('sequelize');
@@ -26,18 +27,16 @@ const { Course } = require('./models');
 
 const app = express();
 
-// Configuração de CORS
+
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: [process.env.FRONTEND_URL],
   credentials: false
 }));
 
-// Middleware para parsear JSON
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-// Registro das rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/areas', areaRoutes);
 app.use('/api/categorias', categoriaRoutes);
@@ -70,14 +69,11 @@ app.use((err, req, res, next) => {
 
 async function updateCourseStatus() {
   try {
-    // 1) Normaliza datas
     const today = new Date();
     today.setHours(0,0,0,0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 2) SÍNCRONOS
-    // 2.1) Já acabou (endDate < tomorrow)
     const [endedSync] = await Course.update(
       { status: false, visible: true, inscricoes: false },
       {
@@ -87,9 +83,8 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Sync Ended] rows:', endedSync);
+    console.log('[Sync Ended] rows:', endedSync);
 
-    // 2.2) Em curso (startDate < tomorrow AND endDate >= tomorrow)
     const [ongoingSync] = await Course.update(
       { status: true, visible: true, inscricoes: false },
       {
@@ -100,9 +95,8 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Sync Ongoing] rows:', ongoingSync);
+    console.log('[Sync Ongoing] rows:', ongoingSync);
 
-    // 2.3) Futuro (startDate >= tomorrow)
     const [futureSync] = await Course.update(
       { status: false, visible: true, inscricoes: true },
       {
@@ -112,9 +106,8 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Sync Future] rows:', futureSync);
+    console.log('[Sync Future] rows:', futureSync);
 
-    // 3) ASSÍNCRONOS
     const [endedAsync] = await Course.update(
       { status: false, visible: false, inscricoes: false },
       {
@@ -124,7 +117,7 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Async Ended] rows:', endedAsync);
+    console.log('[Async Ended] rows:', endedAsync);
 
     const [ongoingAsync] = await Course.update(
       { status: true, visible: true, inscricoes: true },
@@ -136,7 +129,7 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Async Ongoing] rows:', ongoingAsync);
+    console.log('[Async Ongoing] rows:', ongoingAsync);
 
     const [futureAsync] = await Course.update(
       { status: false, visible: true, inscricoes: true },
@@ -147,7 +140,7 @@ async function updateCourseStatus() {
         }
       }
     );
-    console.log('🔔 [Async Future] rows:', futureAsync);
+    console.log('[Async Future] rows:', futureAsync);
 
   } catch (error) {
     console.error('Erro ao atualizar status dos cursos:', error);
@@ -161,12 +154,10 @@ sequelize.authenticate({alter: true})
   })
   .then(() => {
     
-    // Agendador para atualizar status dos cursos a cada minuto
     cron.schedule('* * * * *', async () => {
       await updateCourseStatus();
     });
     
-    // Executar imediatamente ao iniciar o servidor
     updateCourseStatus();
   })
   .catch(err => {
@@ -174,7 +165,6 @@ sequelize.authenticate({alter: true})
     process.exit(1);
   });
 
-// Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

@@ -1,4 +1,3 @@
-// src/components/FileUpload.jsx
 import React, { useState } from 'react';
 import { Button, ProgressBar, Alert } from 'react-bootstrap';
 import { api } from '../services/authService';
@@ -13,7 +12,6 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validar tipo de arquivo baseado no uploadType
     if (uploadType === 'course-image') {
         if (!file.type.startsWith('image/')) {
             setError('Apenas arquivos de imagem são permitidos');
@@ -21,8 +19,7 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
         }
     }
 
-    // Validar tamanho do arquivo
-    const maxSize = uploadType === 'course-image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB para imagens, 10MB para outros
+    const maxSize = uploadType === 'course-image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > maxSize) {
       setError(`Arquivo muito grande. Tamanho máximo: ${maxSize / (1024 * 1024)}MB`);
         return;
@@ -36,7 +33,6 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
     formData.append('file', file);
 
     try {
-        // Usar rota diferente baseada no tipo de upload
         const uploadUrl = uploadType === 'course-image' ? '/image' : '/upload/resource';
         
         const response = await api.post(uploadUrl, formData, {
@@ -50,7 +46,6 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
         });
 
         if (response.data.success) {
-            // Retornar URL baseada no tipo de resposta
             const fileUrl = response.data.imageUrl || response.data.fileUrl || response.data.url;
             onUploadSuccess(fileUrl);
         } else {
@@ -64,7 +59,6 @@ const FileUpload = ({ onUploadSuccess, onUploadError, uploadType = 'course-resou
         } finally {
         setUploading(false);
         setProgress(0);
-        // Limpar input
         event.target.value = '';
         }
     };

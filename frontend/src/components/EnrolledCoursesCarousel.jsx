@@ -9,7 +9,6 @@ import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import Loading from './Loading';
 
-// Componente genérico de seta com cor azul personalizada
 const Arrow = ({ onClick, direction }) => {
   const isPrev = direction === 'prev';
   return (
@@ -50,13 +49,13 @@ const EnrolledCoursesCarousel = () => {
   useEffect(() => {
     const fetchEnrolledCourses = async () => {
       if (!user?.id) {
-        console.error('ID do usuário não disponível');
+        console.error('ID do utilizador não disponível');
         setLoading(false);
         return;
       }
 
       if (isNaN(user.id)) {
-        console.error('ID do usuário inválido:', user.id);
+        console.error('ID do utilizador inválido:', user.id);
         setLoading(false);
         return;
       }

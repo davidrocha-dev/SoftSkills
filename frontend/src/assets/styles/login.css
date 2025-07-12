@@ -1,13 +1,9 @@
-/* src/assets/styles/login.css */
-
-/* Reset mínimo e box-sizing */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Página de login: fundo cinzento e ocupa 100vh */
 .login-page {
   display: flex;
   flex-direction: column;
@@ -17,7 +13,6 @@
   align-items: center;
 }
 
-/* Caixa branca em volta do formulário */
 .login-content {
   background: #e2e2e2;
   border-radius: 8px;
@@ -28,14 +23,13 @@
 .img-logo {
   display: block;
   margin: 0 auto 20px;
-  width: 70%; /* Ajuste conforme necessário */
-  height: auto; /* Mantém a proporção da imagem */
+  width: 70%;
+  height: auto;
   align-items: center;
   padding-bottom: 2rem;
   padding-top: 2rem;
 }
 
-/* Título principal */
 .login-title {
   text-align: center;
   font-size: 2rem;
@@ -45,7 +39,6 @@
   cursor: default;
 }
 
-/* Subtitle */
 .login-subtitle {
   text-align: center;
   color: #555555;
@@ -54,7 +47,6 @@
   cursor: default;
 }
 
-/* Mensagem de erro */
 .login-error {
   background-color: #fdecea;
   color: #b71c1c;
@@ -66,13 +58,11 @@
   font-size: 0.9rem;
 }
 
-/* Formulário */
 .login-form {
   display: flex;
   flex-direction: column;
 }
 
-/* Grupo de campo */
 .form-group {
   margin-bottom: 20px;
 }
@@ -102,7 +92,6 @@
   outline: none;
 }
 
-/* Opções abaixo dos inputs */
 .form-options {
   display: flex;
   justify-content: space-between;
@@ -139,7 +128,6 @@
   text-decoration: underline;
 }
 
-/* Botão de login */
 .login-button {
   width: 100%;
   padding: 12px;
@@ -163,7 +151,6 @@
   cursor: not-allowed;
 }
 
-/* Link para registo / contacto gestor */
 .signup-container {
   text-align: center;
   font-size: 0.9rem;
@@ -180,7 +167,6 @@
   text-decoration: underline;
 }
 
-/* Rodapé abaixo do box */
 .login-footer {
   text-align: center;
   padding: 15px 0;
@@ -225,7 +211,6 @@ select.form-input:focus {
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
-/* Card de sucesso */
 .success-container {
   display: flex;
   justify-content: center;
@@ -340,13 +325,11 @@ select.form-input:focus {
   color: #E0F7FA;
 }
 
-/* Animações */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .success-card {
     padding: 30px 20px;
@@ -367,7 +350,6 @@ select.form-input:focus {
   }
 }
 
-/* Estilos existentes */
 .input-error {
   border: 2px solid #e74c3c !important;
 }

@@ -23,23 +23,19 @@ const VerifyAccount = () => {
       }
       
       try {
-        // 1. Verificar primeiro o estado da conta
         const stateResponse = await api.get(`/users/activation-state?email=${encodeURIComponent(email)}`);
         
-        // Se a conta já estiver verificada, redirecione
         if (stateResponse.data.isVerified) {
           navigate('/login');
           return;
         }
 
-        // 2. Realizar a verificação
         const response = await api.post('/api/auth/verify-account', { email });
         
         if (response.data.success) {
           setStatus('success');
           setMessage('Conta verificada com sucesso! Redirecionando para login...');
           
-          // Redirecionar após 3 segundos
           setTimeout(() => navigate('/login'), 3000);
         } else {
           setStatus('error');

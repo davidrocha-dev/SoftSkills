@@ -1,4 +1,3 @@
-// src/controllers/gestorController.js
 const bcrypt = require('bcrypt');
 const { User, Enrollment, Course, Certificate } = require('../models');
 const { Op, fn, col} = require('sequelize');
@@ -36,7 +35,7 @@ async function createUser(req, res) {
     if (existing) {
       const field = existing.workerNumber === workerNumber ? 'workerNumber' : 'email';
       return res.status(400).json({
-        message: 'Usuário já existe',
+        message: 'Utilizador já existe',
         field,
         value: field === 'workerNumber' ? workerNumber : email
       });
@@ -51,9 +50,9 @@ async function createUser(req, res) {
       status: true,
       pfp: "https://res.cloudinary.com/dnhahua4h/image/upload/v1752293427/user-img_sljz04.png"
     });
-    return res.status(201).json({ id: user.id, message: 'Usuário criado com sucesso' });
+    return res.status(201).json({ id: user.id, message: 'Utilizador criado com sucesso' });
   } catch (err) {
-    console.error('Erro ao criar usuário:', err);
+    console.error('Erro ao criar utilizador:', err);
     if (err.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: 'Violação de restrição única', fields: err.fields });
     }
@@ -72,7 +71,6 @@ async function listUsers(req, res) {
           { email: { [Op.like]: `%${search}%` } },
           { workerNumber: { [Op.like]: `%${search}%` } },
           
-          // Adicionar pesquisa por ID se for número
           ...(!isNaN(search) ? [{ id: parseInt(search) }] : [])
         ];
       }
@@ -96,7 +94,7 @@ async function listUsers(req, res) {
       users:       rows
     });
   } catch (err) {
-    console.error('Erro ao listar usuários:', err);
+    console.error('Erro ao listar utilizadores:', err);
     res.status(500).json({ message: 'Erro interno do servidor' });
   }
 }
@@ -107,7 +105,7 @@ async function updateUserStatus(req, res) {
     const { status } = req.body;
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      return res.status(404).json({ message: 'Utilizador não encontrado' });
     }
     await user.update({ status });
     res.json({ message: 'Status atualizado com sucesso' });
@@ -123,16 +121,16 @@ async function updateUser(req, res) {
     const { workerNumber, name, email, primaryRole } = req.body;
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      return res.status(404).json({ message: 'Utilizador não encontrado' });
     }
     user.workerNumber = workerNumber;
     user.name         = name;
     user.email        = email;
     user.primaryRole  = primaryRole;
     await user.save();
-    return res.json({ message: 'Usuário atualizado com sucesso', user });
+    return res.json({ message: 'Utilizador atualizado com sucesso', user });
   } catch (err) {
-    console.error('Erro ao atualizar usuário:', err);
+    console.error('Erro ao atualizar utilizador:', err);
     return res.status(500).json({ message: 'Erro interno do servidor' });
   }
 }
@@ -162,7 +160,7 @@ async function countUsersByRole(req, res) {
 
     return res.json(result);
   } catch (err) {
-    console.error('Erro ao contar usuários:', err.stack);
+    console.error('Erro ao contar utilizadores:', err.stack);
     return res.status(500).json({ message: 'Erro interno do servidor' });
   }
 }
@@ -179,7 +177,6 @@ async function getUserDetails(req, res) {
       return res.status(404).json({ message: 'Utilizador não encontrado' });
     }
 
-    // Buscar inscrições em cursos
     const enrollments = await Enrollment.findAll({
       where: { userId: user.id },
       include: [{
@@ -189,13 +186,11 @@ async function getUserDetails(req, res) {
       }]
     });
 
-    // Buscar certificados para obter as notas
     const certificates = await Certificate.findAll({
       where: { workerNumber: user.workerNumber },
       attributes: ['courseId', 'grade']
     });
 
-    // Criar um mapa de notas por curso
     const gradeMap = {};
     certificates.forEach(cert => {
       gradeMap[cert.courseId] = cert.grade;

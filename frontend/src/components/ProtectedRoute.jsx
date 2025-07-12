@@ -16,29 +16,24 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     );
   }
   
-  // Verificação de autenticação para rotas protegidas
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Permitir acesso à página de seleção de roles SEMPRE
   if (location.pathname === '/role-selection') {
     return children;
   }
 
   const isFormando = availableRoles.length === 1 && availableRoles[0] === 'formando';
   
-  // Permitir acesso para formandos mesmo sem selectedRole
   if (isFormando && !selectedRole) {
     return children;
   }
   
-  // Redirecionar para seleção apenas se não for formando e não tiver role selecionada
   if (!selectedRole && !isFormando) {
     return <Navigate to="/role-selection" replace />;
   }
 
-  // Verificar permissões
   if (selectedRole && allowedRoles.length > 0 && !allowedRoles.includes(selectedRole)) {
     return <Navigate to="/unauthorized" replace />;
   }

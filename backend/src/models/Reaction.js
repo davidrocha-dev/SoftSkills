@@ -1,4 +1,3 @@
-// models/Reaction.js
 module.exports = (sequelize, DataTypes) => {
   const Reaction = sequelize.define('Reaction', {
     id: {
@@ -29,7 +28,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       field: 'tipo',
       allowNull: false
-      // validação removida para aceitar booleanos
     }
   }, {
     tableName: 'Reaction',
@@ -43,7 +41,6 @@ module.exports = (sequelize, DataTypes) => {
     ]
   });
 
-  // Associações
   Reaction.associate = function(models) {
     Reaction.belongsTo(models.User, {
       foreignKey: 'userId',

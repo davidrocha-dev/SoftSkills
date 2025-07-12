@@ -1,4 +1,3 @@
-// models/Interest.js
 module.exports = (sequelize, DataTypes) => {
   const Interest = sequelize.define('Interest', {
     id: {
@@ -48,7 +47,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações
   Interest.associate = function(models) {
     Interest.belongsTo(models.User, {
       foreignKey: 'n_trabalhador',

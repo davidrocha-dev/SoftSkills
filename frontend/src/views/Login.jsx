@@ -20,7 +20,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Carregar email salvo se existir
   useEffect(() => {
     const savedEmail = Cookies.get('rememberedEmail');
     if (savedEmail) {
@@ -36,14 +35,10 @@ const Login = () => {
     try {
   const result = await login({ email, password });
   
-  // Se precisar alterar senha
   if (result.requiresPasswordChange) {
-    // Redirecionar para a página de primeiro acesso
     navigate(`/first-login?token=${result.token}`);
     return;
   }
-      
-      // Verificar manualmente o token
       const storedToken = localStorage.getItem('token');
       if (!storedToken) {
         throw new Error('Token não foi armazenado corretamente');
@@ -51,14 +46,12 @@ const Login = () => {
       
       authLogin(storedToken, result.user);
       
-      // Salvar email se "Relembrar login" estiver marcado
       if (rememberMe) {
-        Cookies.set('rememberedEmail', email, { expires: 30 }); // 30 dias
+        Cookies.set('rememberedEmail', email, { expires: 30 });
       } else {
         Cookies.remove('rememberedEmail');
       }
       
-      // Redirecionamento
       if (result.user.roles?.includes('formando') && result.user.roles.length === 1) {
         navigate('/dashboard');
       } else {
@@ -68,7 +61,6 @@ const Login = () => {
       if (err.response?.data?.error?.includes('não verificada')) {
         setError('Conta não verificada. Verifique seu email para ativar a conta.');
       } else {
-        // Mostrar a mensagem do backend se existir, senão mostrar 'Credenciais inválidas'
         setError(err.response?.data?.message || 'Credenciais inválidas');
       }
 

@@ -29,14 +29,24 @@ const courseImageStorage = createCloudinaryStorage('course-images', 'image');
 const uploadCourseResource = multer({ 
   storage: courseResourceStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
+    fileSize: 10 * 1024 * 1024,
   }
 });
 
 const uploadCourseImage = multer({ 
   storage: courseImageStorage,
+  fileFilter: (req, file, cb) => {
+    console.log('[upload] Recebido arquivo:', file.originalname, file.mimetype);
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      const err = new Error('Apenas imagens são permitidas!');
+      console.error('[upload] Ficheiro inválido:', file.originalname);
+      cb(err, false);
+    }
+  },
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 5 * 1024 * 1024,
   }
 });
 

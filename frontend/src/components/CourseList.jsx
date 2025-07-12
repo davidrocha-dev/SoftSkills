@@ -1,5 +1,3 @@
-// src/components/CourseList.jsx
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/authService';
 import { FaSearch, FaPlus, FaArrowLeft, FaTrash, FaEdit, FaCalendarAlt, FaUserTie, FaGraduationCap } from 'react-icons/fa';
@@ -7,8 +5,8 @@ import Header from './Header';
 import { Card, Button, Form, InputGroup, Modal, Badge, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Typeahead } from 'react-bootstrap-typeahead'; // Adicionado
-import 'react-bootstrap-typeahead/css/Typeahead.css'; // Estilos necessários
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
@@ -58,8 +56,8 @@ const CourseList = () => {
     courseType: true
   });
 
-   const today = useMemo(() => {
-   const d = new Date(); d.setHours(0,0,0,0);return d; }, [])
+  const today = useMemo(() => {
+  const d = new Date(); d.setHours(0,0,0,0);return d; }, [])
 
     const canEditVacancies = useMemo(() => {
       if (!editData.startDate) return false;
@@ -68,7 +66,7 @@ const CourseList = () => {
       return start > today;
     }, [editData.startDate, today]);
 
-  // Estados para upload de imagem
+
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
   const [createImageFile, setCreateImageFile] = useState(null);
@@ -78,8 +76,7 @@ const CourseList = () => {
     const fetchCourses = async () => {
       try {
         const response = await api.get('/cursos');
-        
-        // Ordenar cursos por ID ascendente (menor para maior)
+
         const sortedCourses = [...response.data].sort((a, b) => a.id - b.id);
         setCourses(sortedCourses);
         
@@ -113,7 +110,7 @@ const CourseList = () => {
       hours: course.hours || 0,
       courseType: course.courseType
     });
-    // Definir a pré-visualização da imagem existente, se houver
+
     setEditImagePreview(course.image || null);
     setEditImageFile(null);
     setShowModal(true);
@@ -132,13 +129,12 @@ const CourseList = () => {
       ...prev,
       [name]: inputType === 'checkbox' ? checked : value
     }))
-     setEditData(prev => ({
-     ...prev,
-     [name]: type === 'checkbox' ? checked : value
-   }));;
+    setEditData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));;
   };
 
-  // Função para fazer upload da imagem
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -161,14 +157,12 @@ const CourseList = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validar tipo de ficheiro
       if (!file.type.startsWith('image/')) {
         showResult('Por favor, selecione apenas ficheiros de imagem (JPG, PNG, GIF, etc.)', false);
         return;
       }
       
-      // Validar tamanho (5MB máximo)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         showResult('O ficheiro é muito grande. Tamanho máximo: 5MB', false);
         return;
@@ -199,7 +193,6 @@ const CourseList = () => {
       return originalValue !== newValue;
     });
 
-    // Verificar se a imagem foi alterada
     const imageChanged = editImageFile !== null;
 
     if (!isChanged && !imageChanged) {
@@ -234,7 +227,6 @@ const CourseList = () => {
         }
       }
 
-      // Preparar os dados para envio, incluindo a imagem
       const updatedEditData = {
         ...editData,
         image: imageUrl
@@ -244,7 +236,6 @@ const CourseList = () => {
         headers: { 'x-selected-role': selectedRole } 
       });
       
-      // Atualizar mantendo a ordem
       setCourses(prev => {
         const updatedCourses = prev.map(c => 
           c.id === selectedCourse.id ? response.data : c
@@ -336,14 +327,12 @@ const CourseList = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validar tipo de ficheiro
       if (!file.type.startsWith('image/')) {
         showResult('Por favor, selecione apenas ficheiros de imagem (JPG, PNG, GIF, etc.)', false);
         return;
       }
       
-      // Validar tamanho (5MB máximo)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         showResult('O ficheiro é muito grande. Tamanho máximo: 5MB', false);
         return;
@@ -390,7 +379,6 @@ const CourseList = () => {
         headers: { 'x-selected-role': selectedRole }
       });
       
-      // Adicionar novo curso no final da lista
       setCourses(prev => {
         const newCourses = [...prev, response.data];
         return newCourses.sort((a, b) => a.id - b.id);
@@ -633,7 +621,6 @@ const CourseList = () => {
                 <div className="col-md-6">
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-medium">Tópico</Form.Label>
-                    {/* Substituído por Typeahead */}
                     <Typeahead
                       id="topic-edit"
                       labelKey={option => `${option.id} - ${option.description}`}
@@ -753,7 +740,6 @@ const CourseList = () => {
                 <div className="col-md-6">
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-medium">Instrutor</Form.Label>
-                    {/* Substituído por Typeahead */}
                     <Typeahead
                       id="instructor-edit"
                       labelKey={option => `${option.workerNumber} - ${option.name}`}
@@ -779,7 +765,6 @@ const CourseList = () => {
                 </div>
               </div>
               
-              {/* Campo para upload de imagem */}
               <Form.Group className="mb-3">
                 <Form.Label className="fw-medium">Imagem do Curso</Form.Label>
                 <Form.Control
@@ -858,7 +843,6 @@ const CourseList = () => {
                 <div className="col-md-6">
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-medium">Tópico *</Form.Label>
-                    {/* Substituído por Typeahead */}
                     <Typeahead
                       id="topic-create"
                       labelKey={option => `${option.id} - ${option.description}`}
@@ -976,7 +960,6 @@ const CourseList = () => {
                 <div className="col-md-6">
                   <Form.Group className="mb-3">
                     <Form.Label className="fw-medium">Instrutor *</Form.Label>
-                    {/* Substituído por Typeahead */}
                     <Typeahead
                       id="instructor-create"
                       labelKey={option => `${option.workerNumber} - ${option.name}`}
@@ -1003,7 +986,6 @@ const CourseList = () => {
                 </div>
               </div>
               
-              {/* Campo para upload de imagem na criação */}
               <Form.Group className="mb-3">
                 <Form.Label className="fw-medium">Imagem do Curso</Form.Label>
                 <Form.Control

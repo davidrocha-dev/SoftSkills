@@ -138,8 +138,7 @@ const Preview = () => {
   return (
     <>
       <Header />
-      <div className="preview-container">
-        {/* Hero Section */}
+      <div className="preview-container"> 
         <section className="hero-section">
           <Container>
             <Row className="align-items-center min-vh-100">
@@ -179,7 +178,6 @@ const Preview = () => {
           </button>
         </div>
 
-        {/* Features Section */}
         <section className="features-section py-5">
           <Container>
             <Row className="text-center mb-5">
@@ -216,7 +214,6 @@ const Preview = () => {
           </Container>
         </section>
 
-        {/* Technical Stack Section */}
         <section className="tech-section py-5 bg-light">
           <Container>
             <Row className="text-center mb-5">
@@ -250,7 +247,6 @@ const Preview = () => {
           </Container>
         </section>
 
-        {/* User Roles Section */}
         <section className="roles-section py-5">
           <Container>
             <Row className="text-center mb-5">
@@ -284,7 +280,6 @@ const Preview = () => {
           </Container>
         </section>
 
-        {/* CTA Section */}
         <section className="cta-section py-5 bg-primary text-white">
           <Container>
             <Row className="text-center">
@@ -303,8 +298,7 @@ const Preview = () => {
             </div>
           </Container>
         </section>
-
-        {/* Footer */}
+              
         <footer className="footer py-4 bg-dark text-white">
           <Container>
             <Row className="text-center">

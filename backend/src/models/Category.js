@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define('Category', {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id_categoria', // Nome físico da coluna
+      field: 'id_categoria',
       primaryKey: true,
       autoIncrement: true
     },

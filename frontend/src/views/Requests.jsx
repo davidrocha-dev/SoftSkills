@@ -1,6 +1,5 @@
-// src/views/Requests.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Spinner, Card, Table, Badge, Button } from 'react-bootstrap';
+import { Container, Card, Table, Badge } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/authService';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -58,7 +57,6 @@ const GestorRequestsPage = () => {
         <span className="badge bg-info">Gestor: {user?.name}</span>
       </div>
 
-      {/* Botão igual ao de CriarUtilizador.jsx :contentReference[oaicite:0]{index=0} */}
       <button
         type="button"
         className="btn btn-outline-secondary"

@@ -1,4 +1,3 @@
-// models/Report.js
 module.exports = (sequelize, DataTypes) => {
   const Report = sequelize.define('Report', {
     id: {
@@ -45,14 +44,12 @@ module.exports = (sequelize, DataTypes) => {
       field: 'status',
       allowNull: false,
       defaultValue: false
-      // validação removida para aceitar booleanos
     }
   }, {
     tableName: 'Report',
     timestamps: false
   });
 
-  // Associações
   Report.associate = function(models) {
     Report.belongsTo(models.Comment, {
       foreignKey: 'id_comentario',

@@ -1,7 +1,5 @@
-// models/Topics.js
 module.exports = (sequelize, DataTypes) => {
   const Topic = sequelize.define('Topic', {
-    // PK identity
     id: {
       type: DataTypes.INTEGER,
       field: 'id_topico',
@@ -22,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'id_area',
       allowNull: false,
       references: {
-        model: 'Area', // Nome da tabela referenciada
+        model: 'Area',
         key: 'id_area'
       }
     }

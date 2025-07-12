@@ -1,4 +1,3 @@
-// src/components/Notification.jsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 

@@ -7,12 +7,10 @@ import Header from '../components/Header';
 import FileUpload from '../components/FileUpload';
 import Loading from '../components/Loading';
 
-
-// Imagem padrão do Cloudinary que não deve ser removida
 const DEFAULT_COURSE_IMAGE = "https://res.cloudinary.com/dnhahua4h/image/upload/v1751910616/my-website/1751910615728-Como-Criar-um-Curso-Online-com-Qualidade-Profissional-Guia-Passo-a-Passo--1-.jpg";
 
 export default function EditCourse() {
-    const { id } = useParams();  // Obter o ID do curso da URL
+    const { id } = useParams();
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -21,18 +19,16 @@ export default function EditCourse() {
     const [newImageUrl, setNewImageUrl] = useState('');
     const [dateErrors, setDateErrors] = useState({ startDate: false, endDate: false });
     const [resourceTypes, setResourceTypes] = useState([]);
-    const [collapsedResources, setCollapsedResources] = useState({}); // { 'sectionIndex-resourceIndex': true/false }
+    const [collapsedResources, setCollapsedResources] = useState({});
     const [enrollments, setEnrollments] = useState([]);
     const [enrollmentsLoading, setEnrollmentsLoading] = useState(true);
     const [enrollmentsError, setEnrollmentsError] = useState('');
     const [enrollmentStatusFilter, setEnrollmentStatusFilter] = useState('Todos');
 
-    // Função para verificar se é a imagem padrão
     const isDefaultImage = (imageUrl) => {
         return imageUrl === DEFAULT_COURSE_IMAGE;
     };
 
-    // Função para formatar data de forma segura
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
         try {
@@ -45,16 +41,13 @@ export default function EditCourse() {
         }
     };
 
-    // Função para converter data de dd/mm/yyyy para ISO
     const convertToISO = (dateString) => {
         if (!dateString) return '';
         
-        // Validar formato dd/mm/yyyy
         const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
         const match = dateString.match(dateRegex);
         
         if (!match) {
-            // Se não estiver no formato correto, retorna como está (pode ser ISO)
             return dateString;
         }
         
@@ -69,7 +62,6 @@ export default function EditCourse() {
         }
     };
 
-    // Função para converter data de ISO para dd/mm/yyyy
     const convertToDisplayFormat = (dateString) => {
         if (!dateString) return '';
         try {
@@ -85,10 +77,8 @@ export default function EditCourse() {
         }
     };
 
-    // Carregar os dados do curso e tipos de recursos
     useEffect(() => {
         const fetchData = async () => {
-            // Verificar se o usuário está autenticado
             const token = localStorage.getItem('token');
             if (!token) {
                 setError('Utilizador não autenticado. Redirecionando para login...');
@@ -99,7 +89,6 @@ export default function EditCourse() {
             }
 
             try {
-                // Carregar curso e tipos de recursos em paralelo
                 const [courseResponse, resourceTypesResponse] = await Promise.all([
                     api.get(`/cursos/${id}`),
                     api.get('/resource-types')
@@ -126,7 +115,6 @@ export default function EditCourse() {
         fetchData();
     }, [id, navigate]);
 
-    // Buscar enrollments do curso
     useEffect(() => {
         const fetchEnrollments = async () => {
             try {
@@ -142,22 +130,19 @@ export default function EditCourse() {
         fetchEnrollments();
     }, [id]);
 
-    // Inicializar todos os recursos como fechados por padrão
     useEffect(() => {
-      const collapsed = {};
-      sections.forEach((section, sectionIndex) => {
-        (section.resources || []).forEach((_, resourceIndex) => {
-          collapsed[`${sectionIndex}-${resourceIndex}`] = true;
+        const collapsed = {};
+        sections.forEach((section, sectionIndex) => {
+            (section.resources || []).forEach((_, resourceIndex) => {
+                collapsed[`${sectionIndex}-${resourceIndex}`] = true;
+            });
         });
-      });
-      setCollapsedResources(collapsed);
+        setCollapsedResources(collapsed);
     }, [sections.length]);
 
-    // Função para atualizar os dados do curso
     const handleCourseChange = (e) => {
         const { name, value } = e.target;
         
-        // Converter datas para formato ISO se for campo de data
         if (name === 'startDate' || name === 'endDate') {
             const isoDate = convertToISO(value);
             const isValid = isoDate !== '' || value === '';
@@ -168,11 +153,9 @@ export default function EditCourse() {
         }
     };
 
-    // Função para atualizar as seções e recursos aninhados
     const handleSectionChange = (sectionIndex, field, ...args) => {
         const updatedSections = [...sections];
         if (field === 'resources') {
-            // Atualizar campo de um recurso específico
             const [resourceIndex, resourceField, resourceValue] = args;
             const updatedResources = [...(updatedSections[sectionIndex].resources || [])];
             updatedResources[resourceIndex] = {
@@ -186,10 +169,8 @@ export default function EditCourse() {
         setSections(updatedSections);
     };
 
-    // Adicionar nova seção (POST imediato para o backend)
     const addSection = async () => {
         try {
-            // Calcular a próxima ordem baseada na maior ordem atual
             const maxOrder = sections.length > 0 ? Math.max(...sections.map(s => s.order)) : 0;
             const newOrder = maxOrder + 1;
             
@@ -200,7 +181,6 @@ export default function EditCourse() {
                 courseId: course?.id
             };
             const response = await api.post(`/cursos/${course.id}/sections`, newSection);
-            // O backend deve devolver a seção criada já com id
             setSections([...sections, { ...response.data, resources: [] }]);
         } catch (err) {
             setError('Erro ao criar seção');
@@ -211,7 +191,6 @@ export default function EditCourse() {
         }
     };
 
-    // Adicionar recurso à seção
     const addResource = (sectionIndex) => {
         const updatedSections = [...sections];
         const currentResources = updatedSections[sectionIndex].resources || [];
@@ -219,7 +198,7 @@ export default function EditCourse() {
         
         updatedSections[sectionIndex].resources.push({
             title: 'Novo Recurso',
-            typeId: 1, // valor default, pode ser alterado pelo utilizador
+            typeId: 1,
             text: '',
             file: '',
             link: '',
@@ -228,22 +207,18 @@ export default function EditCourse() {
         setSections(updatedSections);
     };
 
-    // Função para lidar com upload de arquivo para recurso
     const handleResourceFileUpload = (sectionIndex, resourceIndex, fileUrl) => {
         const updatedSections = [...sections];
         updatedSections[sectionIndex].resources[resourceIndex].file = fileUrl;
         setSections(updatedSections);
     };
 
-    // Função para lidar com erro no upload de arquivo do recurso
     const handleResourceFileUploadError = (error) => {
         setError(`Erro no upload do ficheiro: ${error}`);
     };
 
-    // Remover seção
     const removeSection = (index) => {
         const updatedSections = sections.filter((_, i) => i !== index);
-        // Reordenar automaticamente após remover
         const reorderedSections = updatedSections
             .sort((a, b) => a.order - b.order)
             .map((section, idx) => ({
@@ -253,49 +228,40 @@ export default function EditCourse() {
         setSections(reorderedSections);
     };
 
-    // Mover seção para cima
     const moveSectionUp = (index) => {
-        if (index === 0) return; // Já está no topo
+        if (index === 0) return;
         
         const updatedSections = [...sections];
         const currentSection = updatedSections[index];
         const previousSection = updatedSections[index - 1];
         
-        // Trocar as ordens
         const tempOrder = currentSection.order;
         currentSection.order = previousSection.order;
         previousSection.order = tempOrder;
-        
-        // Trocar as posições no array
+
         updatedSections[index] = previousSection;
         updatedSections[index - 1] = currentSection;
         
         setSections(updatedSections);
     };
 
-    // Mover seção para baixo
     const moveSectionDown = (index) => {
-        if (index === sections.length - 1) return; // Já está no final
+        if (index === sections.length - 1) return;
         
         const updatedSections = [...sections];
         const currentSection = updatedSections[index];
         const nextSection = updatedSections[index + 1];
         
-        // Trocar as ordens
         const tempOrder = currentSection.order;
         currentSection.order = nextSection.order;
         nextSection.order = tempOrder;
         
-        // Trocar as posições no array
         updatedSections[index] = nextSection;
         updatedSections[index + 1] = currentSection;
         
         setSections(updatedSections);
     };
 
-
-
-    // Remover recurso
     const removeResource = (sectionIndex, resourceIndex) => {
         const updatedSections = [...sections];
         updatedSections[sectionIndex].resources = updatedSections[sectionIndex].resources.filter(
@@ -304,15 +270,12 @@ export default function EditCourse() {
         setSections(updatedSections);
     };
 
-    // Função para lidar com o upload de imagem
     const handleImageUpload = (imageUrl) => {
-        // Não permite fazer upload da imagem padrão
         if (isDefaultImage(imageUrl)) {
             setError('Não é possível usar a imagem padrão. Por favor, escolha outra imagem.');
             return;
         }
         
-        // Se a nova imagem for igual à atual, não mostra como "nova"
         if (imageUrl === course.image) {
             setNewImageUrl('');
         } else {
@@ -322,48 +285,42 @@ export default function EditCourse() {
         setCourse(prev => ({ ...prev, image: imageUrl }));
     };
 
-    // Função para lidar com erro no upload
     const handleImageUploadError = (error) => {
         setError(`Erro no upload da imagem: ${error}`);
     };
 
-    // Função para remover a imagem atual
     const handleRemoveImage = () => {
-        // Não permite remover a imagem padrão
         if (isDefaultImage(course.image)) {
             return;
         }
         setCourse(prev => ({ ...prev, image: DEFAULT_COURSE_IMAGE }));
-        setNewImageUrl(''); // Limpa a nova imagem selecionada
+        setNewImageUrl('');
     };
 
     const toggleCollapse = (sectionIndex, resourceIndex) => {
-      setCollapsedResources(prev => ({
-        ...prev,
-        [`${sectionIndex}-${resourceIndex}`]: !prev[`${sectionIndex}-${resourceIndex}`]
-      }));
+        setCollapsedResources(prev => ({
+            ...prev,
+            [`${sectionIndex}-${resourceIndex}`]: !prev[`${sectionIndex}-${resourceIndex}`]
+        }));
     };
 
     const moveResource = (sectionIndex, resourceIndex, direction) => {
-      const updatedSections = [...sections];
-      const resources = [...updatedSections[sectionIndex].resources];
-      if (
-        (direction === 'up' && resourceIndex === 0) ||
-        (direction === 'down' && resourceIndex === resources.length - 1)
-      ) return;
-      const newIndex = direction === 'up' ? resourceIndex - 1 : resourceIndex + 1;
-      [resources[resourceIndex], resources[newIndex]] = [resources[newIndex], resources[resourceIndex]];
-      // Atualizar o campo order de todos os recursos
-      resources.forEach((res, idx) => { res.order = idx + 1; });
-      updatedSections[sectionIndex].resources = resources;
-      setSections(updatedSections);
+        const updatedSections = [...sections];
+        const resources = [...updatedSections[sectionIndex].resources];
+        if (
+            (direction === 'up' && resourceIndex === 0) ||
+            (direction === 'down' && resourceIndex === resources.length - 1)
+        ) return;
+        const newIndex = direction === 'up' ? resourceIndex - 1 : resourceIndex + 1;
+        [resources[resourceIndex], resources[newIndex]] = [resources[newIndex], resources[resourceIndex]];
+        resources.forEach((res, idx) => { res.order = idx + 1; });
+        updatedSections[sectionIndex].resources = resources;
+        setSections(updatedSections);
     };
 
-    // Salvar as alterações
     const saveCourse = async () => {
         console.log('Sections antes de salvar:', sections);
         try {
-            // Apenas os campos necessários para o backend
             const {
                 id: courseId,
                 title,
@@ -381,9 +338,8 @@ export default function EditCourse() {
                 topicId
             } = course;
 
-            // Garante que as ordens das seções são únicas e sequenciais
             const orderedSections = sections
-                .slice() // cópia
+                .slice()
                 .sort((a, b) => a.order - b.order)
                 .map((section, idx) => ({
                     ...section,
@@ -398,7 +354,7 @@ export default function EditCourse() {
                 level,
                 startDate,
                 endDate,
-                image: isDefaultImage(image) || !image ? DEFAULT_COURSE_IMAGE : image, // Usa imagem padrão se for padrão ou vazio
+                image: isDefaultImage(image) || !image ? DEFAULT_COURSE_IMAGE : image,
                 vacancies,
                 courseType,
                 visible,
@@ -454,7 +410,6 @@ export default function EditCourse() {
         </div>
     );
 
-    // Verificar se course existe antes de renderizar
     if (!course) {
         return (
             <div className="alert alert-warning m-4" role="alert">
@@ -467,26 +422,25 @@ export default function EditCourse() {
     return (
         <>
             <Header />
-            <Container fluid className="mt-4 d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-              <Row className="w-100 justify-content-center">
-                <Col md={8} className="mx-auto">
-                  <div className="d-flex justify-content-between align-items-center mb-3 w-100">
-                    <h2 className="text-start mb-0">Editar Curso: {course.title}</h2>
-                    <div className="d-flex gap-2">
-                      <Button variant="outline-primary" onClick={() => navigate(`/cursos/${id}/inscricoes`)}>
-                        Ver Alunos
-                      </Button>
-                      <Button 
-                        variant="outline-success" 
-                        onClick={() => navigate(`/certificate-management/${id}`)}
-                      >
-                        <Award size={16} className="me-1" />
-                        Emitir Certificados
-                      </Button>
+                <Container fluid className="mt-4 d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <Row className="w-100 justify-content-center">
+                    <Col md={8} className="mx-auto">
+                    <div className="d-flex justify-content-between align-items-center mb-3 w-100">
+                        <h2 className="text-start mb-0">Editar Curso: {course.title}</h2>
+                        <div className="d-flex gap-2">
+                        <Button variant="outline-primary" onClick={() => navigate(`/cursos/${id}/inscricoes`)}>
+                            Ver Alunos
+                        </Button>
+                        <Button 
+                            variant="outline-success" 
+                            onClick={() => navigate(`/certificate-management/${id}`)}
+                        >
+                            <Award size={16} className="me-1" />
+                            Emitir Certificados
+                        </Button>
+                        </div>
                     </div>
-                  </div>
 
-                        {/* Formulário do curso */}
                         <Card className="mb-4">
                             <Card.Body>
                                 <Form>
@@ -596,11 +550,9 @@ export default function EditCourse() {
                                     </Row>
                                 </Form>
                             </Card.Body>
-                        </Card>
+                        </Card> 
 
-                        {/* Seções do curso */}
                         <h3 className="mb-3">Seções do Curso</h3>
-                        {/* Lista ordenada das seções já criadas */}
                         <ul className="list-group mb-3">
                             {sections.length === 0 && <li className="list-group-item">Nenhuma seção criada ainda.</li>}
                             {sections
@@ -653,7 +605,6 @@ export default function EditCourse() {
                             Adicionar Seção
                         </Button>
 
-                        {/* Accordion das seções deve começar fechado por padrão */}
                         <Accordion>
                             {sections
                                 .sort((a, b) => a.order - b.order)
@@ -679,7 +630,6 @@ export default function EditCourse() {
                                             onChange={(e) => handleSectionChange(sectionIndex, 'status', e.target.checked)}
                                         />
 
-                                        {/* Recursos da seção */}
                                         <h4 className="mt-4">Recursos</h4>
                                         <Button
                                             variant="outline-primary"
@@ -769,10 +719,8 @@ export default function EditCourse() {
                                                                     placeholder="Digite o texto ou descrição do recurso..."
                                                                 />
                                                             </Form.Group>
-                                                            {/* Os campos abaixo só aparecem se o recurso NÃO tem id */}
                                                             {!resource.id && (
                                                                 <>
-                                                                    {/* Tipo de recurso, upload, link, etc. */}
                                                                     <Form.Group className="mb-3">
                                                                         <Form.Label>Tipo de Recurso</Form.Label>
                                                                         <div className="d-flex gap-2 align-items-end">
@@ -836,8 +784,7 @@ export default function EditCourse() {
                                                                         </Form.Group>
                                                                     )}
                                                                 </>
-                                                            )}
-                                                            {/* Mostrar localização do ficheiro/link e botão apenas para recursos existentes */}
+                                                            )} 
                                                             {resource.id && (resource.file || resource.link) && (
                                                                 <div className="mb-2">
                                                                     <Form.Group className="mb-2">
@@ -875,8 +822,8 @@ export default function EditCourse() {
                         </div>
                         <div style={{ height: '60px' }} />
                     </Col>
-                  </Row>
-                </Container>
+                </Row>
+            </Container>
         </>
     );
 }

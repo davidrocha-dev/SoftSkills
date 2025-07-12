@@ -1,13 +1,11 @@
-/* Estilos para a navbar */
 .navbar {
-  background-color: #0066cc; /* Azul forte para contraste */
+  background-color: #0066cc;
   padding: 10px 20px;
 }
 
 .navbar-nav {
   display: flex;
-  justify-content: space-around; /* Distribui os itens da navbar */
-  align-items: center;
+  justify-content: space-around;
   width: 100%;
 }
 
@@ -25,10 +23,9 @@
 }
 
 .nav-link:hover {
-  background-color: #005a99; /* Azul mais claro no hover */
+  background-color: #005a99;
 }
 
-/* Dropdown menu */
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -42,7 +39,6 @@
   display: none;
 }
 
-/* Mostrar o menu ao passar o mouse */
 .nav-item:hover .dropdown-menu {
   display: block;
 }
@@ -54,10 +50,9 @@
 }
 
 .dropdown-item:hover {
-  background-color: #f0f0f0; /* Cor de fundo no hover */
+  background-color: #f0f0f0;
 }
 
-/* Submenu de tópicos */
 .submenu-topics {
   position: absolute;
   top: 0;
@@ -78,7 +73,6 @@
   background-color: #f0f0f0;
 }
 
-/* Ajustes no botão Sair */
 .btn-outline-danger {
   border-color: #cc3333;
   color: #cc3333;

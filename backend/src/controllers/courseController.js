@@ -27,7 +27,6 @@ const db = require('../models');
 const { Op } = require('sequelize');
 const { Course, Section, Resource, ResourceType } = db;
 
-// A FUNCIONAR
 exports.listCourses = async (req, res) => {
   try {
     const courses = await db.Course.findAll({
@@ -290,7 +289,7 @@ exports.getEnrolledCourses = async (req, res) => {
     const userIdNumber = parseInt(userId, 10);
     
     if (isNaN(userIdNumber)) {
-      return res.status(400).json({ message: 'ID do usuário inválido' });
+      return res.status(400).json({ message: 'ID do utilizador inválido' });
     }
 
     const enrollments = await db.Enrollment.findAll({

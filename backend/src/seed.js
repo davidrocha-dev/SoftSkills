@@ -19,15 +19,12 @@ const {
 
 async function clearDatabase() {
   try {
-    // Nova abordagem sem session_replication_role
-    // Lista de modelos em ordem inversa de dependência
     const models = [
       Report, Reaction, Comment, Interest, Notification,
       Enrollment, Certificate, Resource, Section,
       Course, Topic, Area, Category, User, ResourceType
     ];
 
-    // Deleta registros em cascata
     for (const model of models) {
       await model.destroy({
         where: {},
@@ -48,28 +45,24 @@ async function clearDatabase() {
 
 async function seedDatabase() {
   try {
-    // Limpa dados existentes
     await clearDatabase();
 
-    // Cria usuários
     const users = await User.bulkCreate([
       { workerNumber: 'U001', name: 'Admin', primaryRole: 'gestor', email: 'admin@softinsa.pt', password: '$2a$10$fYg3/WdKs3bZBt/kq09YpON2wULR9Csd/hDz9YBtunqaYoWF8KR1e', status: true },
       { workerNumber: 'U002', name: 'Formador', primaryRole: 'formador', email: 'formador@softinsa.pt', password: '$2a$10$4XQ0UOzS22Woa0slPEin8.3qK0T6T0IqQl6YvDRJSy8ZbP10RQ3ue', status: true },
       { workerNumber: 'U003', name: 'Formando', primaryRole: 'formando', email: 'formando@softinsa.pt', password: '$2a$10$jX7yGbV/TXLxFkl4fQqW/ONztwHDMWWe/P.Wa0UsqcMdFktjG/vdO', status: true }
     ]);
-    console.log('Usuários criados!');
+    console.log('Utilizadores criados!');
 
-    // Cria categorias
     const categories = await Category.bulkCreate([
       { description: 'Tecnologia' },
       { description: 'Comunicação' },
       { description: 'Gestão' },
       { description: 'Marketing' },
       { description: 'Design' }
-    ], { validate: true }); // Forçar validação
+    ], { validate: true });
     console.log('Categorias criadas!');
 
-    // Cria tipos de recurso
     const resourceTypes = await ResourceType.bulkCreate([
       { type: 1, name: 'Documento', icon: 'Documento' },
       { type: 2, name: 'Video', icon: 'Video' },
@@ -79,13 +72,11 @@ async function seedDatabase() {
     ]);
     console.log('Tipos de recurso criados!');
 
-    // Mapeia descrição para ID
     const categoryMap = {};
     categories.forEach(cat => {
       categoryMap[cat.description] = cat.id;
     });
 
-    // Cria áreas usando os IDs reais
 const areas = await Area.bulkCreate([
   { description: 'Programação', categoryId: categories[0].id },
   { description: 'Redes Sociais', categoryId: categories[1].id },
@@ -99,7 +90,6 @@ const areas = await Area.bulkCreate([
   { description: 'Ilustração', categoryId: categories[4].id }
 ]);
 
-    // Cria tópicos
     const topics = await Topic.bulkCreate([
       { description: 'JavaScript', areaId: 1 },
       { description: 'Instagram Pro', areaId: 2 },
@@ -114,7 +104,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Tópicos criados!');
 
-    // Cria cursos
     const courses = await Course.bulkCreate([
       { title: 'Curso A', courseType: false, description: 'Desc A', instructor: 'U002', topicId: 1, level: 'Básico', startDate: '2025-04-01', endDate: '2025-04-10', hours: 10, vacancies: 30, status: true },
       { title: 'Curso B', courseType: true, description: 'Desc B', instructor: 'U003', topicId: 2, level: 'Intermédio', startDate: '2025-04-02', endDate: '2025-04-12', hours: 12, vacancies: 0, status: true },
@@ -129,7 +118,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Cursos criados!');
 
-    // Cria seções
     const sections = await Section.bulkCreate([
       { courseId: 1, title: 'Introdução', order: 1, status: true },
       { courseId: 2, title: 'Módulo 1', order: 1, status: true },
@@ -144,7 +132,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Seções criadas!');
 
-    // Cria recursos
     const resources = await Resource.bulkCreate([
       { sectionId: 1, typeId: 1, title: 'PDF Introdução', text: 'Conteúdo PDF', file: 'intro.pdf', link: null },
       { sectionId: 2, typeId: 2, title: 'Vídeo Módulo 1', text: null, file: null, link: 'https://youtube.com/mod1' },
@@ -159,7 +146,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Recursos criados!');
 
-    // Cria certificados
     const certificates = await Certificate.bulkCreate([
       { courseId: 1, workerNumber: 'U001', grade: 90, observation: 'Bom' },
       { courseId: 2, workerNumber: 'U002', grade: 88, observation: 'Muito bom' },
@@ -174,7 +160,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Certificados criados!');
 
-    // Cria inscrições
     const enrollments = await Enrollment.bulkCreate([
       { courseId: 1, workerNumber: 'U001', enrollmentDate: '2025-04-01', status: 'Ativo', rating: 4.5 },
       { courseId: 2, workerNumber: 'U002', enrollmentDate: '2025-04-01', status: 'Ativo', rating: 4.7 },
@@ -189,7 +174,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Inscrições criadas!');
 
-    // Cria notificações
     const notifications = await Notification.bulkCreate([
       { type: 'Info', message: 'Curso disponível', sendDate: '2025-04-01', workerNumber: 'U001', seen: false },
       { type: 'Alerta', message: 'Alteração de horário', sendDate: '2025-04-01', workerNumber: 'U002', seen: false },
@@ -204,7 +188,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Notificações criadas!');
 
-    // Cria interesses
     const interests = await Interest.bulkCreate([
       { workerNumber: 'U001', categoryId: 1, areaId: 1, topicId: 1 },
       { workerNumber: 'U001', categoryId: 2, areaId: 2, topicId: 2 },
@@ -219,7 +202,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Interesses criados!');
 
-    // Cria comentários
     const comments = await Comment.bulkCreate([
       { topicId: 1, workerNumber: 'U001', parentCommentId: null, commentDate: '2025-04-01', content: 'Muito bom!', status: true },
       { topicId: 2, workerNumber: 'U002', parentCommentId: null, commentDate: '2025-04-01', content: 'Gostei bastante', status: true },
@@ -234,7 +216,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Comentários criados!');
 
-    // Cria reações
     const reactions = await Reaction.bulkCreate([
       { workerNumber: 'U001', commentId: 1, type: true },
       { workerNumber: 'U002', commentId: 2, type: true },
@@ -249,7 +230,6 @@ const areas = await Area.bulkCreate([
     ]);
     console.log('Reações criadas!');
 
-    // Cria denúncias
     const reports = await Report.bulkCreate([
       { commentId: 3, workerNumber: 'U002', reportDate: '2025-04-01', reason: 'Comentário ofensivo', status: false },
       { commentId: 4, workerNumber: 'U001', reportDate: '2025-04-01', reason: 'Spam', status: false },

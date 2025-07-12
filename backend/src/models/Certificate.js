@@ -1,4 +1,3 @@
-// models/Certificate.js
 module.exports = (sequelize, DataTypes) => {
   const Certificate = sequelize.define('Certificate', {
     id: {
@@ -52,7 +51,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false
   });
 
-  // Associações
   Certificate.associate = function(models) {
     Certificate.belongsTo(models.Course, {
       foreignKey: 'courseId',

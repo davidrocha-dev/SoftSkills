@@ -1,4 +1,3 @@
-// models/Enrollment.js
 module.exports = (sequelize, DataTypes) => {
   const Enrollment = sequelize.define('Enrollment', {
     id: {

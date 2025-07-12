@@ -17,8 +17,7 @@ import {
 import {
   FaFileAlt,
   FaVideo,
-  FaLink,
-  FaAudioDescription
+  FaLink
 } from 'react-icons/fa';
 import '../assets/styles/course.css';
 import Loading from '../components/Loading';
@@ -36,15 +35,12 @@ export default function Course() {
   const [showMore, setShowMore]                 = useState(false);
   const [showToggle, setShowToggle]             = useState(false);
   const descRef = useRef(null);
-  // Adicionar estado para enrollmentStatus
   const [enrollmentStatus, setEnrollmentStatus] = useState(null);
 
-  // Função para ordenar os recursos pela "order"
   const getSortedResources = (resources) => {
     return [...resources].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   };
 
-  // Função para formatar datas em dd/mm/yyyy
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -82,7 +78,6 @@ export default function Course() {
     if (el) setShowToggle(el.scrollHeight > el.clientHeight);
   }, [course, showMore]);
 
-  // Adicionar variável para verificar se é o formador
   const isInstructor = user?.workerNumber && course?.instructor && user.workerNumber === course.instructor;
 
   useEffect(() => {
@@ -104,7 +99,7 @@ export default function Course() {
         courseId: id,
         userId: user.id
       };
-      console.log('Enviando dados para inscrição:', requestBody);  // Adicione o log para verificar os dados
+      console.log('Enviando dados para inscrição:', requestBody);
       await api.post(
         '/enrollments/',
         requestBody,
@@ -166,7 +161,6 @@ export default function Course() {
 
   const vacancies = course.vacancies ?? Infinity;
 const isFull = totalEnrollments >= vacancies;
-// A constante `disableEnroll` já considera ambas as condições.
 const disableEnroll = isEnrolled || (vacancies !== Infinity && totalEnrollments >= vacancies);
 
 
@@ -260,8 +254,7 @@ return (
                 </Row>
               </Col>
             </Row>
-
-            {/* Mostrar sempre as seções do curso */}
+                  
             {((isEnrolled && enrollmentStatus === 'Ativo') || isInstructor) ? (
               course.sections && course.sections.length > 0 ? (
                 <Accordion className="w-100 mt-4">

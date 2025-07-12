@@ -55,10 +55,8 @@ const ForumModeration = () => {
       setActionLoading(true);
       await api.put(`/forum/moderate-comment/${commentId}`, { action });
       
-      // Atualizar a lista após a ação
       await fetchPendingComments();
       
-      // Fechar modal se estiver aberto
       setShowModal(false);
       setSelectedComment(null);
     } catch (err) {
@@ -73,10 +71,8 @@ const ForumModeration = () => {
       setActionLoading(true);
       await api.put(`/forum/resolve-report/${reportId}`, { action });
       
-      // Atualizar a lista após a ação
       await fetchPendingReports();
       
-      // Fechar modal se estiver aberto
       setShowModal(false);
       setSelectedReport(null);
     } catch (err) {
@@ -283,7 +279,6 @@ const ForumModeration = () => {
         </Card>
       </Container>
 
-      {/* Modal de confirmação para rejeitar comentário */}
       {selectedComment && (
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
@@ -315,7 +310,6 @@ const ForumModeration = () => {
         </Modal>
       )}
 
-      {/* Modal de confirmação para remover comentário denunciado */}
       {selectedReport && (
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>

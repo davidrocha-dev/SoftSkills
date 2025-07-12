@@ -1,4 +1,3 @@
-// src/views/FormandoDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CoursesCarousel from '../components/CoursesCarousel';
@@ -9,7 +8,6 @@ import { api } from '../services/authService';
 const FormandoDashboard = () => {
   const { user, selectedRole } = useAuth();
 
-  // Estados de filtros
   const [filters, setFilters] = useState({
     categoryId: null,
     areaId: null,
@@ -23,24 +21,19 @@ const FormandoDashboard = () => {
     searchTerm
   );
 
-  // Metadados para filtros
   const [categories, setCategories] = useState([]);
   const [areas, setAreas] = useState([]);
   const [topics, setTopics] = useState([]);
   const [loadingMeta, setLoadingMeta] = useState(true);
 
-  // Cursos filtrados
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [loadingFiltered, setLoadingFiltered] = useState(false);
 
-  // Cursos em que o user está inscrito
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loadingEnrolled, setLoadingEnrolled] = useState(true);
 
-  // Filtros ativos para badges
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // 1) Carrega categorias, áreas e tópicos
   useEffect(() => {
     (async () => {
       try {
@@ -60,7 +53,6 @@ const FormandoDashboard = () => {
     })();
   }, [selectedRole]);
 
-  // 2) Eventos de filtros e pesquisa vindos da navbar
   useEffect(() => {
     const onFilterChange = e => {
       setFilters(prev => ({ ...prev, ...e.detail }));
@@ -78,7 +70,6 @@ const FormandoDashboard = () => {
     };
   }, []);
 
-  // 3) Atualiza activeFilters
   useEffect(() => {
     if (loadingMeta) return;
     const list = [];
@@ -90,7 +81,6 @@ const FormandoDashboard = () => {
     setActiveFilters(list);
   }, [filters, searchTerm, categories, areas, topics, loadingMeta]);
 
-  // 4) Busca cursos filtrados quando há filtros
   useEffect(() => {
     if (!hasFilters) return;
     (async () => {
@@ -113,7 +103,6 @@ const FormandoDashboard = () => {
     })();
   }, [filters, searchTerm, hasFilters, selectedRole]);
 
-  // 5) Busca cursos em que o user está inscrito
   useEffect(() => {
     (async () => {
       setLoadingEnrolled(true);
@@ -125,8 +114,8 @@ const FormandoDashboard = () => {
         const courses = await Promise.all(
           ids.map(id =>
             api.get(`/cursos/${id}`, { headers: { 'x-selected-role': selectedRole } })
-               .then(r => r.data.course)
-               .catch(() => null)
+              .then(r => r.data.course)
+              .catch(() => null)
           )
         );
         setEnrolledCourses(courses.filter(Boolean));
@@ -138,7 +127,6 @@ const FormandoDashboard = () => {
     })();
   }, [user.id, selectedRole]);
 
-  // Limpa filtros
   const clearFilter = type => {
     if (type === 'Pesquisa') setSearchTerm('');
     else setFilters(prev => ({ ...prev, [`${type.toLowerCase()}Id`]: null }));
@@ -150,7 +138,6 @@ const FormandoDashboard = () => {
 
   return (
     <div className="container py-4">
-      {/* Header */}
       <div className="bg-primary bg-gradient text-white rounded-3 p-4 mb-5 shadow">
         <div className="d-flex justify-content-between align-items-center">
           <h1 className="h2 mb-0">Bem-vindo, {user?.name}!</h1>
@@ -158,7 +145,6 @@ const FormandoDashboard = () => {
         </div>
       </div>
 
-      {/* Os Meus Cursos */}
       {!hasFilters && (
         <div className="card border-0 shadow mb-5">
           <div className="card-header bg-white py-3">
@@ -179,7 +165,6 @@ const FormandoDashboard = () => {
         </div>
       )}
 
-      {/* Cursos Filtrados */}
       {hasFilters && (
         <div className="card border-0 shadow mb-5">
           <div className="card-header bg-white py-3 d-flex justify-content-between">
@@ -218,7 +203,6 @@ const FormandoDashboard = () => {
         </div>
       )}
 
-      {/* Descubra Novos Cursos */}
       {!hasFilters && (
         <div className="card border-0 shadow">
           <div className="card-header bg-white py-3">

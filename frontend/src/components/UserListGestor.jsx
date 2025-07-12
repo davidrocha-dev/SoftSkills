@@ -25,13 +25,11 @@ const UserListGestor = forwardRef((props, ref) => {
     primaryRole: ''
   });
 
-  // Estados para os modais
   const [showResultModal, setShowResultModal] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Timer para debounce da pesquisa
   const [searchTimer, setSearchTimer] = useState(null);
 
   const loadUsers = async () => {
@@ -48,7 +46,6 @@ const UserListGestor = forwardRef((props, ref) => {
         headers: { 'x-selected-role': selectedRole }
       });
       
-      // Ordenar os usuários por ID (crescente)
       const sortedUsers = response.data.users.sort((a, b) => a.id - b.id);
       
       setUsers(sortedUsers);
@@ -63,12 +60,10 @@ const UserListGestor = forwardRef((props, ref) => {
     }
   };
 
-  // Expor o método loadUsers através da ref
   useImperativeHandle(ref, () => ({
     loadUsers
   }));
 
-  // Efeito para pesquisa automática com debounce
   useEffect(() => {
     if (searchTimer) {
       clearTimeout(searchTimer);
@@ -86,7 +81,6 @@ const UserListGestor = forwardRef((props, ref) => {
     };
   }, [searchTerm]);
 
-  // Efeito para filtrar por status/função
   useEffect(() => {
     setCurrentPage(1);
     loadUsers();
@@ -450,7 +444,6 @@ const UserListGestor = forwardRef((props, ref) => {
           </div>
         )}
 
-        {/* Modal de Resultado */}
         <Modal 
           show={showResultModal} 
           onHide={() => setShowResultModal(false)}
@@ -478,8 +471,7 @@ const UserListGestor = forwardRef((props, ref) => {
             </Button>
           </Modal.Footer>
         </Modal>
-
-        {/* Modal de Confirmação de Exclusão */}
+        
         <Modal 
           show={showDeleteModal} 
           onHide={() => setShowDeleteModal(false)}

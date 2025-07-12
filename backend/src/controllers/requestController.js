@@ -5,7 +5,6 @@ exports.createRequest = async (req, res) => {
   try {
     const { workerNumber, name, email, subject, message } = req.body;
     
-    // Validação básica
     if (!workerNumber || !name || !email || !subject || !message) {
       return res.status(400).json({
         success: false,
@@ -13,7 +12,6 @@ exports.createRequest = async (req, res) => {
       });
     }
     
-    // Criar solicitação
     const newRequest = await Request.create({
       workerNumber,
       name,
@@ -23,10 +21,9 @@ exports.createRequest = async (req, res) => {
       status: 'Pendente'
     });
     
-    // Enviar email de confirmação
     try {
       await emailService.sendRequestConfirmation({
-        id: newRequest.id, // Garantir que o ID está sendo enviado
+        id: newRequest.id,
         workerNumber,
         name,
         email,
@@ -57,7 +54,6 @@ exports.resolveRequest = async (req, res) => {
     const { id } = req.params;
     const { resolutionDetails } = req.body;
 
-    // 1) Buscar o pedido
     const request = await Request.findByPk(id);
     if (!request) {
       return res.status(404).json({
@@ -66,14 +62,12 @@ exports.resolveRequest = async (req, res) => {
       });
     }
 
-    // 2) Atualizar o pedido como resolvido
     await request.update({
       status: 'Resolvido',
       resolutionDetails,
       resolvedAt: new Date()
     });
 
-    // 3) Enviar email de notificação de resolução
     try {
       await emailService.sendRequestResolved({
         id: request.id,
@@ -86,10 +80,8 @@ exports.resolveRequest = async (req, res) => {
       console.log(`Email de resolução enviado para ${request.email}`);
     } catch (emailError) {
       console.error('Erro ao enviar email de resolução:', emailError);
-      // Continua mesmo que o email falhe
     }
 
-    // 4) Retornar o pedido atualizado ao front-end
     return res.json({
       success: true,
       message: 'Solicitação marcada como resolvida',
@@ -110,10 +102,9 @@ exports.listRequests = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
     
-    // Corrija a estrutura de retorno
     res.json({
       success: true,
-      requests // Adicione esta propriedade
+      requests
     });
   } catch (error) {
     console.error('Erro ao buscar pedidos:', error);
@@ -135,10 +126,9 @@ exports.getRequestById = async (req, res) => {
       });
     }
     
-    // Corrija a estrutura de retorno
     res.json({
       success: true,
-      request // Adicione esta propriedade
+      request
     });
   } catch (error) {
     console.error('Erro ao buscar pedido:', error);

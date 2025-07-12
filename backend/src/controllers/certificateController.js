@@ -110,7 +110,7 @@ const issueCertificate = async (req, res) => {
         const course = await Course.findByPk(courseId);
         
         if (!user || !course) {
-            console.log('Usuário ou curso não encontrado');
+            console.log('Utilizador ou curso não encontrado');
             return res.status(404).json({ 
                 message: 'Utilizador ou curso não encontrado' 
             });

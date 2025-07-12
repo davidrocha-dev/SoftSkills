@@ -89,7 +89,6 @@ exports.checkFk = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verifique se há cursos associados (recursos não têm relação direta)
     const courses = await Course.count({ where: { topicId: id } });
     
     return res.json({ 
@@ -113,7 +112,6 @@ exports.deleteTopic = async (req, res) => {
       return res.status(404).json({ message: 'Tópico não encontrado' });
     }
 
-    // Verifique apenas cursos associados
     const courses = await Course.count({ where: { topicId: id } });
     
     if (courses > 0) {
