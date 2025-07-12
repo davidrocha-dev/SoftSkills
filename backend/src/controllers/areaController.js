@@ -1,6 +1,5 @@
 const { Area, Category, Topic} = require('../models/index');
 
-// Exemplo correto de consulta com eager loading
 exports.listAreas = async (req, res) => {
   try {
     const areas = await Area.findAll({
@@ -61,12 +60,10 @@ exports.checkFk = async (req, res) => {
       include: [{ model: Topic, as: 'topics' }]
     });
 
-    // Se a área não for encontrada, considere que não há FK
     if (!area) {
       return res.json({ hasFk: false });
     }
 
-    // Se houver tópicos associados, retorne true
     if (area.topics && area.topics.length > 0) {
       return res.json({ hasFk: true });
     }
@@ -81,18 +78,15 @@ exports.checkFk = async (req, res) => {
   }
 };
 
-// Adicione esta função no final do arquivo
 exports.deleteArea = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Verifique se a área existe
     const area = await Area.findByPk(id);
     if (!area) {
       return res.status(404).json({ error: 'Área não encontrada' });
     }
 
-    // Verifique se há tópicos associados
     const topics = await Topic.findAll({ where: { areaId: id } });
     if (topics.length > 0) {
       return res.status(400).json({ 
@@ -100,9 +94,8 @@ exports.deleteArea = async (req, res) => {
       });
     }
 
-    // Exclua a área
     await area.destroy();
-    return res.status(204).send(); // 204 No Content
+    return res.status(204).send();
   } catch (err) {
     console.error('Erro ao excluir área:', err);
     return res.status(500).json({ error: 'Erro interno ao excluir área' });

@@ -1,4 +1,3 @@
-// src/models/User.js
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: {
@@ -75,7 +74,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false
     },
-    // Campos para redefinição de password
     resetToken: {
       type: DataTypes.STRING(255),
       field: 'reset_token',
@@ -112,7 +110,7 @@ module.exports = (sequelize, DataTypes) => {
     User.associate = function(models) {
     User.hasMany(models.Comment, {
       foreignKey: 'id_utilizador',
-      as: 'comments' // Alias inverso (opcional mas recomendado)
+      as: 'comments'
     });
   };
 
