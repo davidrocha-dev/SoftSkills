@@ -206,7 +206,7 @@ const UserDetails = () => {
                       <td className="text-center">
                         {enrollment.grade !== null && enrollment.grade !== undefined ? (
                           <Badge bg={enrollment.grade >= 10 ? 'success' : 'danger'}>
-                            {enrollment.grade}/100
+                            {enrollment.grade}/20
                           </Badge>
                         ) : (
                           <span className="text-muted">Curso Incompleto</span>
