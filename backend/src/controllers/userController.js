@@ -110,43 +110,26 @@ exports.getProfileByWorkerNumber = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-
     const { id } = req.params;
-    if (parseInt(id) === req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Não é possível eliminar o utilizador autenticado.'
-      });
-    }
-
+    // Permitir que o próprio utilizador se elimine (removido o bloqueio)
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Utilizador não encontrado' });
     }
 
     await Enrollment.destroy({ where: { userId: id } });
-
-
     await Request.destroy({ where: { workerNumber: user.workerNumber } });
-
     await Interest.destroy({ where: { workerNumber: user.workerNumber } });
-
     const { Certificate, Notification, Reaction, Comment, Report } = require('../models');
     await Certificate.destroy({ where: { workerNumber: user.workerNumber } });
-
     await Notification.destroy({ where: { workerNumber: user.workerNumber } });
-
     await Reaction.destroy({ where: { userId: id } });
-
     await Comment.destroy({ where: { userId: id } });
-
     await Report.destroy({ where: { userId: id } });
-
     await Course.update(
       { instructor: '' },
       { where: { instructor: user.name } }
     );
-
     await user.destroy();
     return res.json({ success: true });
   } catch (error) {
