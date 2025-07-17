@@ -210,21 +210,26 @@ exports.deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
     const course = await db.Course.findByPk(id);
-    
     if (!course) {
       return res.status(404).json({ message: 'Curso não encontrado' });
     }
 
-    const enrollmentsCount = await db.Enrollment.count({
-      where: { courseId: id }
-    });
+    // Eliminar todos os enrollments associados ao curso
+    await db.Enrollment.destroy({ where: { courseId: id } });
 
-    if (enrollmentsCount > 0) {
-      return res.status(400).json({
-        message: 'Não é possível excluir um curso com inscrições ativas'
-      });
+    // Eliminar todos os certificados associados ao curso
+    await db.Certificate.destroy({ where: { courseId: id } });
+
+    // Buscar todas as secções do curso
+    const sections = await db.Section.findAll({ where: { courseId: id } });
+    for (const section of sections) {
+      // Eliminar recursos associados à secção
+      await db.Resource.destroy({ where: { sectionId: section.id } });
+      // Eliminar a secção
+      await section.destroy();
     }
 
+    // Eliminar o curso
     await course.destroy();
     return res.json({ message: 'Curso excluído com sucesso' });
   } catch (error) {
