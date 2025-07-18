@@ -92,8 +92,8 @@ exports.getAvailableCourses = async (req, res) => {
   try {
     const { categoriaId, areaId, topicoId, search } = req.query;
     const now = new Date();
+    // Remove status: true from filter
     const filter = {
-      status: true,
       visible: true,
       inscricoes: true,
       endDate: { [Op.gte]: now },
